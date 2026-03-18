@@ -243,78 +243,7 @@ with NaijaLingo(api_key="nl-...") as client:
     audio = client.tts.generate("Bawo ni!", voice="yo")
     audio.save("output.wav")
 # Connection pool is automatically closed
-```
 
----
-
-## Publishing to PyPI
-
-Follow these steps to publish the SDK to [PyPI](https://pypi.org):
-
-### 1. Prerequisites
-
-```bash
-# Install build and upload tools
-pip install build twine
-```
-
-### 2. Create a PyPI Account
-
-1. Go to [https://pypi.org/account/register/](https://pypi.org/account/register/) and create an account
-2. Go to **Account Settings → API tokens** and create a new API token
-3. Save the token securely — you'll need it for uploading
-
-### 3. Build the Package
-
-```bash
-# From the 9jalingo-sdk root directory
-cd 9jalingo-sdk
-python -m build
-```
-
-This creates distribution files in the `dist/` directory:
-- `naijalingo-0.1.0.tar.gz` (source distribution)
-- `naijalingo-0.1.0-py3-none-any.whl` (wheel)
-
-### 4. Test Upload (Recommended)
-
-Upload to [TestPyPI](https://test.pypi.org) first to verify everything works:
-
-```bash
-# Upload to TestPyPI
-twine upload --repository testpypi dist/*
-```
-
-When prompted:
-- **Username:** `__token__`
-- **Password:** your TestPyPI API token
-
-Test the install:
-
-```bash
-pip install --index-url https://test.pypi.org/simple/ naijalingo
-```
-
-### 5. Upload to PyPI (Production)
-
-```bash
-twine upload dist/*
-```
-
-When prompted:
-- **Username:** `__token__`
-- **Password:** your PyPI API token
-
-### 6. Verify
-
-```bash
-pip install naijalingo
-python -c "from naijalingo import NaijaLingo; print('✅ naijalingo installed successfully!')"
-```
-
-> **Tip:** For CI/CD automation, you can store your PyPI token as a GitHub secret and use [GitHub Actions](https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/) to publish automatically on new releases.
-
----
 
 ## Links
 
@@ -323,8 +252,4 @@ python -c "from naijalingo import NaijaLingo; print('✅ naijalingo installed su
 - 🐛 **Issues:** [GitHub Issues](https://github.com/9jaLingo/naijalingo-python/issues)
 - 📦 **PyPI:** [pypi.org/project/naijalingo](https://pypi.org/project/naijalingo/)
 
----
 
-## License
-
-MIT License — see [LICENSE](LICENSE) for details.
