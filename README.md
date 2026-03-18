@@ -243,7 +243,8 @@ with NaijaLingo(api_key="nl-...") as client:
     audio = client.tts.generate("Bawo ni!", voice="yo")
     audio.save("output.wav")
 # Connection pool is automatically closed
-
+```
+---
 
 ## Links
 
