@@ -53,12 +53,28 @@ class _BaseClient:
 
     def _request(self, method: str, path: str, **kwargs: Any) -> httpx.Response:
         """Make an HTTP request and handle errors."""
-        try:
-            response = self._client.request(method, path, **kwargs)
-        except httpx.ConnectError as exc:
-            raise ConnectionError(f"Unable to connect to {self.base_url}: {exc}") from exc
-        except httpx.TimeoutException as exc:
-            raise ConnectionError(f"Request timed out after {self.timeout}s: {exc}") from exc
+        import time
+        last_exc = None
+        for attempt in range(3):
+            try:
+                response = self._client.request(method, path, **kwargs)
+                break
+            except httpx.ConnectError as exc:
+                last_exc = exc
+            except httpx.TimeoutException as exc:
+                # Only retry connection timeouts, not read timeouts
+                if isinstance(exc, httpx.ConnectTimeout):
+                    last_exc = exc
+                else:
+                    raise ConnectionError(f"Request timed out after {self.timeout}s: {exc}") from exc
+                
+            if attempt < 2:
+                time.sleep(1.5)
+        else:
+            if isinstance(last_exc, httpx.ConnectError):
+                raise ConnectionError(f"Unable to connect to {self.base_url}: {last_exc}") from last_exc
+            else:
+                raise ConnectionError(f"Request timed out after {self.timeout}s: {last_exc}") from last_exc
 
         if response.is_success:
             return response
@@ -102,18 +118,27 @@ class _BaseClient:
 
     def _post_stream(self, path: str, body: dict) -> Iterator[bytes]:
         """POST request returning a byte stream (chunked transfer)."""
-        try:
-            with self._client.stream("POST", path, json=body) as resp:
-                if not resp.is_success:
-                    resp.read()
-                    self._raise_for_status(resp)
-                for chunk in resp.iter_bytes(chunk_size=8192):
-                    if chunk:
-                        yield chunk
-        except httpx.ConnectError as exc:
-            raise ConnectionError(f"Unable to connect to {self.base_url}: {exc}") from exc
-        except httpx.TimeoutException as exc:
-            raise ConnectionError(f"Request timed out: {exc}") from exc
+        import time
+        for attempt in range(3):
+            try:
+                with self._client.stream("POST", path, json=body) as resp:
+                    if not resp.is_success:
+                        resp.read()
+                        self._raise_for_status(resp)
+                    for chunk in resp.iter_bytes(chunk_size=8192):
+                        if chunk:
+                            yield chunk
+                return
+            except httpx.ConnectError as exc:
+                if attempt < 2:
+                    time.sleep(1.5)
+                    continue
+                raise ConnectionError(f"Unable to connect to {self.base_url}: {exc}") from exc
+            except httpx.TimeoutException as exc:
+                if attempt < 2 and isinstance(exc, httpx.ConnectTimeout):
+                    time.sleep(1.5)
+                    continue
+                raise ConnectionError(f"Request timed out: {exc}") from exc
 
     def _post_multipart(self, path: str, data: dict, files: dict) -> bytes:
         """POST multipart/form-data, returning raw bytes."""
