@@ -257,7 +257,7 @@ with NaijaLingo(api_key="nl-...") as client:
 ## Links
 
 - 🌐 **Website:** [www.9jalingo.org](https://www.9jalingo.org)
-- 📖 **Documentation:** [docs.9jalingo.org](https://docs.9jalingo.org)
+- 📖 **Documentation:** [api.9jalingo.org](https://api.9jalingo.org)
 - 🐛 **Issues:** [GitHub Issues](https://github.com/9jaLingo/naijalingo-python/issues)
 - 📦 **PyPI:** [pypi.org/project/naijalingo](https://pypi.org/project/naijalingo/)
 

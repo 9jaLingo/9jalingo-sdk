@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
 authors = [
-    { name = "9jaLingo", email = "hello@9jalingo.com" },
+    { name = "9jaLingo", email = "support@9jalingo.org" },
 ]
 keywords = [
     "tts",
@@ -60,7 +60,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://www.9jalingo.org"
-Documentation = "https://docs.9jalingo.org"
+Documentation = "https://api.9jalingo.org"
 Repository = "https://github.com/9jaLingo/naijalingo-python"
 Issues = "https://github.com/9jaLingo/naijalingo-python/issues"
 Website = "https://www.9jalingo.org"
