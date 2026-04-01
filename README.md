@@ -22,7 +22,8 @@ Whether you're building voice assistants, accessibility tools, e-learning platfo
 
 - 🗣️ **Text-to-Speech** — Convert text to natural speech in 4 Nigerian languages
 - 🎭 **240+ Speaker Voices** — Choose from a diverse library of male and female voices
-- 🔊 **Voice Cloning** — Clone any voice from a short reference audio sample
+- 🔊 **Voice Cloning** — Clone any voice from a short reference audio sample (WAV, MP3, M4A, etc.)
+- 🎧 **Multi-Format Output** — Export speech natively to WAV, PCM, MP3, FLAC, AAC, ALAC, or OGG
 - 📡 **Streaming** — Stream audio chunks as they're generated for real-time playback
 - ⚡ **Long-Form Generation** — Automatically handles long texts with intelligent chunking
 - 🤖 **OpenAI-Compatible** — Drop-in replacement for OpenAI TTS with Nigerian language support
@@ -89,6 +90,10 @@ audio.save("adaeze_greeting.wav")
 audio = client.tts.generate("Hello!", voice="pcm", response_format="pcm")
 pcm_bytes = audio.content  # raw 16-bit signed LE, 22050 Hz mono
 
+# Export directly to compressed formats like MP3 or FLAC
+audio = client.tts.generate("Make we test compressed audio.", voice="pcm", response_format="mp3")
+audio.save("output.mp3")
+
 # Adjust generation parameters
 audio = client.tts.generate(
     "Na so life be sometimes.",
@@ -126,10 +131,11 @@ Clone a voice from a reference audio file:
 ```python
 audio = client.tts.clone(
     "Kedu ka i mere?",
-    audio_file="reference_voice.wav",
+    audio_file="reference_voice.mp3", # Natively supports MP3, M4A, FLAC, OGG, etc.
     voice="ig",
+    response_format="mp3"
 )
-audio.save("cloned.wav")
+audio.save("cloned.mp3")
 
 # From a file-like object
 with open("reference.wav", "rb") as f:

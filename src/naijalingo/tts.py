@@ -141,7 +141,7 @@ class TTS:
         temperature: float | None = None,
         top_p: float | None = None,
         repetition_penalty: float | None = None,
-        response_format: Literal["wav", "pcm"] = "wav",
+        response_format: Literal["wav", "pcm", "flac", "aac", "ogg", "mp3", "alac"] = "wav",
     ) -> AudioResponse:
         """Generate speech using a cloned voice from a reference audio file.
 
@@ -153,7 +153,7 @@ class TTS:
             temperature: Sampling temperature.
             top_p: Nucleus sampling threshold.
             repetition_penalty: Repetition penalty factor.
-            response_format: ``"wav"`` or ``"pcm"``.
+            response_format: ``"wav"``, ``"pcm"``, ``"flac"``, ``"aac"``, ``"ogg"``, ``"mp3"``, or ``"alac"``.
 
         Returns:
             An :class:`AudioResponse` containing the generated audio bytes.
@@ -181,13 +181,25 @@ class TTS:
             if repetition_penalty is not None:
                 data["repetition_penalty"] = str(repetition_penalty)
 
-            files = {"audio": (filename, file_obj, "audio/wav")}
+            import mimetypes
+            mime_type, _ = mimetypes.guess_type(filename)
+            mime_type = mime_type or "application/octet-stream"
+
+            files = {"audio": (filename, file_obj, mime_type)}
             content = self._client._post_multipart("/v1/audio/clone", data=data, files=files)
         finally:
             if should_close:
                 file_obj.close()
 
-        media_type = "audio/wav" if response_format == "wav" else "application/octet-stream"
+        media_type = {
+            "wav": "audio/wav",
+            "pcm": "application/octet-stream",
+            "flac": "audio/flac",
+            "aac": "audio/aac",
+            "ogg": "audio/ogg",
+            "mp3": "audio/mpeg",
+            "alac": "audio/alac",
+        }.get(response_format, "application/octet-stream")
         return AudioResponse(content, media_type=media_type)
 
     # ── Speakers ─────────────────────────────────────────────────
@@ -245,7 +257,7 @@ class TTS:
         Returns:
             A :class:`HealthStatus` with current server state.
         """
-        data = self._client._get_json("/health")
+        data = self._client._get_json("/v1/health")
         return HealthStatus.from_dict(data)
 
     # ── Private ──────────────────────────────────────────────────

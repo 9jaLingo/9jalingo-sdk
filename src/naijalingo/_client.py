@@ -27,11 +27,11 @@ class _BaseClient:
         self,
         *,
         api_key: str | None = None,
-        base_url: str | None = None,
+        base_url: str = _DEFAULT_BASE_URL,
         timeout: float = _DEFAULT_TIMEOUT,
     ):
         self.api_key = api_key or os.environ.get("NAIJALINGO_API_KEY", "")
-        resolved_base_url = base_url or os.environ.get("NAIJALINGO_BASE_URL", _DEFAULT_BASE_URL)
+        resolved_base_url = base_url
         self.base_url = resolved_base_url.rstrip("/")
         self.timeout = timeout
 

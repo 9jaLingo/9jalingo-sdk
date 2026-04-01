@@ -74,8 +74,7 @@ class NaijaLingo:
     Args:
         api_key: Your 9jaLingo API key. Falls back to the
             ``NAIJALINGO_API_KEY`` environment variable.
-        base_url: Override the API base URL. Falls back to
-            ``NAIJALINGO_BASE_URL`` or ``https://api.9jalingo.org``.
+        base_url: Override the API base URL. Defaults to ``https://api.9jalingo.org/``.
         timeout: Request timeout in seconds (default 120).
 
     Usage::
@@ -123,7 +122,7 @@ class NaijaLingo:
         self,
         api_key: str | None = None,
         *,
-        base_url: str | None = None,
+        base_url: str = "https://api.9jalingo.org/",
         timeout: float = 120.0,
     ):
         self._client = _BaseClient(api_key=api_key, base_url=base_url, timeout=timeout)
