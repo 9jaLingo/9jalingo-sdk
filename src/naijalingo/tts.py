@@ -10,6 +10,8 @@ from typing import IO, Iterator, Literal
 from naijalingo._client import _BaseClient
 from naijalingo._types import HealthStatus, LanguageList, Speaker, SpeakerList
 
+_DEFAULT_MODEL_NAME = "9jalingo-tts-1"
+
 
 class TTS:
     """Text-to-Speech operations.
@@ -33,6 +35,7 @@ class TTS:
         text: str,
         *,
         voice: str = "pcm",
+        model_name: str = _DEFAULT_MODEL_NAME,
         speaker: str | None = None,
         speaker_embedding: list[float] | None = None,
         response_format: Literal["wav", "pcm"] = "wav",
@@ -49,6 +52,8 @@ class TTS:
             text: The text to convert to speech.
             voice: Language tag — ``"ha"`` (Hausa), ``"ig"`` (Igbo),
                 ``"yo"`` (Yoruba), ``"pcm"`` (Pidgin).
+            model_name: Model ID (e.g. ``"9jalingo-tts-1"``). Defaults to
+                ``"9jalingo-tts-1"``.
             speaker: Speaker ID (e.g. ``"ada_pcm"``). Auto-detects language
                 from the speaker name.
             speaker_embedding: Raw 128-dim speaker embedding vector for
@@ -68,6 +73,7 @@ class TTS:
         body = self._build_body(
             text=text,
             voice=voice,
+            model_name=model_name,
             speaker=speaker,
             speaker_embedding=speaker_embedding,
             response_format=response_format,
@@ -138,6 +144,7 @@ class TTS:
         audio_file: str | Path | IO[bytes],
         *,
         voice: str = "pcm",
+        model_name: str = _DEFAULT_MODEL_NAME,
         temperature: float | None = None,
         top_p: float | None = None,
         repetition_penalty: float | None = None,
@@ -150,6 +157,8 @@ class TTS:
             audio_file: Path to a WAV file or a file-like object containing
                 the reference audio.
             voice: Language tag.
+            model_name: Model ID (e.g. ``"9jalingo-tts-1"``). Defaults to
+                ``"9jalingo-tts-1"``.
             temperature: Sampling temperature.
             top_p: Nucleus sampling threshold.
             repetition_penalty: Repetition penalty factor.
@@ -172,6 +181,7 @@ class TTS:
             data = {
                 "text": text,
                 "voice": voice,
+                "model_name": model_name,
                 "response_format": response_format,
             }
             if temperature is not None:
