@@ -57,10 +57,15 @@ class Language:
 
     code: str
     name: str
+    speaker_count: int = 0
 
     @classmethod
     def from_dict(cls, data: dict) -> Language:
-        return cls(code=data.get("code", ""), name=data.get("name", ""))
+        return cls(
+            code=data.get("code", ""),
+            name=data.get("name", ""),
+            speaker_count=data.get("speaker_count", 0),
+        )
 
 
 @dataclass
@@ -74,9 +79,17 @@ class LanguageList:
     def from_dict(cls, data: dict) -> LanguageList:
         raw_langs = data.get("languages", [])
         if isinstance(raw_langs, dict):
-            languages = [Language(code=k, name=v) for k, v in raw_langs.items()]
+            # vLLM server returns {"ha": {"name": "Hausa", "speaker_count": N, ...}}
+            languages = [
+                Language(
+                    code=k,
+                    name=v["name"] if isinstance(v, dict) else str(v),
+                    speaker_count=v.get("speaker_count", 0) if isinstance(v, dict) else 0,
+                )
+                for k, v in raw_langs.items()
+            ]
         else:
-            languages = [Language.from_dict(l) for l in raw_langs]
+            languages = [Language.from_dict(lang) for lang in raw_langs]
         return cls(
             languages=languages,
             domains=data.get("domains", []),
@@ -88,17 +101,23 @@ class HealthStatus:
     """API health check result."""
 
     status: str
-    tts_initialized: bool
-    speakers_loaded: int
-    supported_languages: dict[str, str] = field(default_factory=dict)
+    engine_ready: bool = False
+    codec_ready: bool = False
+    total_speakers: int = 0
+    languages: list[str] = field(default_factory=list)
+    voice_cloning_available: bool = False
+    speaker_projection_loaded: bool = False
 
     @classmethod
     def from_dict(cls, data: dict) -> HealthStatus:
         return cls(
             status=data.get("status", "unknown"),
-            tts_initialized=data.get("tts_initialized", False),
-            speakers_loaded=data.get("speakers_loaded", 0),
-            supported_languages=data.get("supported_languages", {}),
+            engine_ready=data.get("engine_ready", data.get("tts_initialized", False)),
+            codec_ready=data.get("codec_ready", False),
+            total_speakers=data.get("total_speakers", data.get("speakers_loaded", 0)),
+            languages=data.get("languages", list(data.get("supported_languages", {}).keys())),
+            voice_cloning_available=data.get("voice_cloning_available", False),
+            speaker_projection_loaded=data.get("speaker_projection_loaded", False),
         )
 
 

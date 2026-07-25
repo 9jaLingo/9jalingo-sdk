@@ -17,7 +17,11 @@ from naijalingo._exceptions import (
 )
 
 _DEFAULT_BASE_URL = "https://api.9jalingo.org"
-_DEFAULT_TIMEOUT = 120.0
+# The server serializes all inference behind a single asyncio.Lock (batch_size=1).
+# Under concurrent load, each request must wait for all preceding ones to finish.
+# Formula: N_concurrent * single_request_latency.  300s handles up to ~25 requests
+# at ~12s each.  Override via NaijaLingo(timeout=...) for higher concurrency.
+_DEFAULT_TIMEOUT = 300.0
 
 
 class _BaseClient:
@@ -35,18 +39,17 @@ class _BaseClient:
         self.base_url = resolved_base_url.rstrip("/")
         self.timeout = timeout
 
-        if not self.api_key:
-            raise AuthenticationError(
-                "No API key provided. Pass api_key= or set the NAIJALINGO_API_KEY environment variable."
-            )
+        # api_key is optional for self-hosted / local vLLM servers that have
+        # no authentication middleware. For the managed API (api.9jalingo.org)
+        # a key is required and the server will 401 without it.
+        headers: dict[str, str] = {"User-Agent": "naijalingo-python/0.1.0"}
+        if self.api_key:
+            headers["X-API-Key"] = self.api_key
 
         self._client = httpx.Client(
             base_url=self.base_url,
             timeout=httpx.Timeout(timeout, connect=10.0),
-            headers={
-                "X-API-Key": self.api_key,
-                "User-Agent": "naijalingo-python/0.1.0",
-            },
+            headers=headers,
         )
 
     # ── HTTP helpers ─────────────────────────────────────────────

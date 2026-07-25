@@ -44,8 +44,8 @@ from naijalingo import NaijaLingo
 
 client = NaijaLingo(api_key="nl-...")
 
-# Generate speech
-audio = client.tts.generate("Bawo ni, I dey greet you!", voice="yo")
+# voice = speaker ID (not a language code like "yo" or "pcm")
+audio = client.tts.generate("Bawo ni, I dey greet you!", voice="adeola_yo")
 audio.save("greeting.wav")
 ```
 
@@ -59,9 +59,14 @@ export NAIJALINGO_API_KEY="nl-..."
 from naijalingo import NaijaLingo
 
 client = NaijaLingo()  # picks up NAIJALINGO_API_KEY from env
-audio = client.tts.generate("Sannu da zuwa!", voice="ha")
+audio = client.tts.generate("Sannu da zuwa!", voice="aisha_ha")
 audio.save("output.wav")
 ```
+
+> **Important:** For `generate` and `stream`, `voice` is a **speaker ID**
+> (e.g. `ada_pcm`, `adaeze_ig`). Do **not** pass language codes (`ha`, `ig`,
+> `yo`, `pcm`). Use `list_speakers(language="pcm")` to discover speaker IDs.
+> Voice cloning is different: `clone(..., voice="ig")` still takes a language code.
 
 ---
 
@@ -74,30 +79,33 @@ from naijalingo import NaijaLingo
 
 client = NaijaLingo(api_key="nl-...")
 
-# Basic generation (returns WAV)
-audio = client.tts.generate("How you dey?", voice="pcm")
+# Basic generation (returns WAV) — pass a speaker ID
+audio = client.tts.generate("How you dey?", voice="ada_pcm")
 audio.save("output.wav")
 
-# With a specific speaker voice
+# Same idea with the optional speaker= alias (takes precedence over voice)
 audio = client.tts.generate(
     "Nnoo, kedu ka i mere?",
-    voice="ig",
-    speaker="adaeze_ig",
+    voice="adaeze_ig",
 )
 audio.save("adaeze_greeting.wav")
 
 # Raw PCM format
-audio = client.tts.generate("Hello!", voice="pcm", response_format="pcm")
+audio = client.tts.generate("Hello!", voice="ada_pcm", response_format="pcm")
 pcm_bytes = audio.content  # raw 16-bit signed LE, 22050 Hz mono
 
 # Export directly to compressed formats like MP3 or FLAC
-audio = client.tts.generate("Make we test compressed audio.", voice="pcm", response_format="mp3")
+audio = client.tts.generate(
+    "Make we test compressed audio.",
+    voice="ada_pcm",
+    response_format="mp3",
+)
 audio.save("output.mp3")
 
 # Adjust generation parameters
 audio = client.tts.generate(
     "Na so life be sometimes.",
-    voice="pcm",
+    voice="ada_pcm",
     temperature=0.8,
     top_p=0.9,
     repetition_penalty=1.2,
@@ -111,22 +119,23 @@ For long texts, stream audio chunks as they're generated:
 ```python
 # Stream to a file
 with open("long_speech.wav", "wb") as f:
-    for chunk in client.tts.stream("Very long text here...", voice="pcm"):
+    for chunk in client.tts.stream("Very long text here...", voice="ada_pcm"):
         f.write(chunk)
 
 # Or collect the full stream
-long_text="""
-        Life na one kind journey wey nobody fit fully understand. From the day person open eye for this world, the journey don start. 
+long_text = """
+        Life na one kind journey wey nobody fit fully understand. From the day person open eye for this world, the journey don start.
         Some people go say life na race, some go say na school, others go talk say na battle. But the truth be say life na mixture of many things together. E get sweet time, e get bitter time, e get time wey everything go dey move smooth like fresh engine, and e get time wey everywhere go just scatter like market wey rain beat.
         """
-stream = client.tts.stream(long_text, voice="pcm", speaker="ada_pcm")
+stream = client.tts.stream(long_text, voice="ada_pcm")
 audio = stream.collect()
 audio.save("long_speech.wav")
 ```
 
 ### Voice Cloning
 
-Clone a voice from a reference audio file:
+Clone a voice from a reference audio file. Here `voice` is a **language code**
+(`ha` / `ig` / `yo` / `pcm`), not a speaker ID:
 
 ```python
 audio = client.tts.clone(
@@ -150,7 +159,7 @@ speakers = client.tts.list_speakers()
 for s in speakers:
     print(f"{s.id} — {s.language} ({s.gender})")
 
-# Filter by language
+# Filter by language code
 yoruba_speakers = client.tts.list_speakers(language="yo")
 
 # Get a specific speaker
@@ -206,12 +215,15 @@ print(status.speakers_loaded)   # 240
 
 ## Supported Languages
 
-| Code  | Language        | Description |
-|-------|-----------------|-------------|
-| `ha`  | Hausa           | Widely spoken across Northern Nigeria and West Africa |
-| `ig`  | Igbo            | Native to southeastern Nigeria |
-| `yo`  | Yoruba          | Spoken across southwestern Nigeria and Benin |
-| `pcm` | Nigerian Pidgin | The most widely spoken lingua franca in Nigeria |
+Language codes (`ha`, `ig`, `yo`, `pcm`) are used to **filter speakers** and for
+**voice cloning**. They are **not** valid `voice` values for `generate` / `stream`.
+
+| Code  | Language        | Description | Example speakers |
+|-------|-----------------|-------------|------------------|
+| `ha`  | Hausa           | Widely spoken across Northern Nigeria and West Africa | `aisha_ha`, `bello_ha` |
+| `ig`  | Igbo            | Native to southeastern Nigeria | `adaeze_ig`, `ifeanyi_ig` |
+| `yo`  | Yoruba          | Spoken across southwestern Nigeria and Benin | `adeola_yo`, `adekunle_yo` |
+| `pcm` | Nigerian Pidgin | The most widely spoken lingua franca in Nigeria | `ada_pcm`, `blessing_pcm` |
 
 ---
 
@@ -223,13 +235,16 @@ from naijalingo import NaijaLingo, AuthenticationError, NotFoundError, ServerErr
 client = NaijaLingo(api_key="nl-...")
 
 try:
-    audio = client.tts.generate("Hello!", speaker="nonexistent_speaker")
+    audio = client.tts.generate("Hello!", voice="nonexistent_speaker")
 except AuthenticationError:
     print("Invalid API key")
 except NotFoundError as e:
     print(f"Speaker not found: {e.message}")
 except ServerError:
     print("Server error — try again later")
+except ValueError as e:
+    # Raised locally if you pass a language code as voice, e.g. voice="pcm"
+    print(e)
 ```
 
 ---
@@ -248,17 +263,15 @@ except ServerError:
 
 ```python
 with NaijaLingo(api_key="nl-...") as client:
-    audio = client.tts.generate("Bawo ni!", voice="yo")
+    audio = client.tts.generate("Bawo ni!", voice="adeola_yo")
     audio.save("output.wav")
 # Connection pool is automatically closed
 ```
+
 ---
 
 ## Links
 
 - 🌐 **Website:** [www.9jalingo.org](https://www.9jalingo.org)
-- 📖 **Documentation:** [api.9jalingo.org](https://api.9jalingo.org)
-- 🐛 **Issues:** [GitHub Issues](https://github.com/9jaLingo/naijalingo-python/issues)
-- 📦 **PyPI:** [pypi.org/project/naijalingo](https://pypi.org/project/naijalingo/)
-
-
+- 📚 **API Docs:** [www.9jalingo.org/api-documentation](https://www.9jalingo.org/api-documentation)
+- 💬 **Support:** [support@9jalingo.org](mailto:support@9jalingo.org)
