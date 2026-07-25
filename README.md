@@ -44,8 +44,12 @@ from naijalingo import NaijaLingo
 
 client = NaijaLingo(api_key="nl-...")
 
-# voice = speaker ID (not a language code like "yo" or "pcm")
-audio = client.tts.generate("Bawo ni, I dey greet you!", voice="adeola_yo")
+# voice/speaker = speaker ID · lang/language = language code
+audio = client.tts.generate(
+    "Bawo ni, I dey greet you!",
+    voice="adeola_yo",
+    lang="yo",
+)
 audio.save("greeting.wav")
 ```
 
@@ -59,14 +63,17 @@ export NAIJALINGO_API_KEY="nl-..."
 from naijalingo import NaijaLingo
 
 client = NaijaLingo()  # picks up NAIJALINGO_API_KEY from env
-audio = client.tts.generate("Sannu da zuwa!", voice="aisha_ha")
+audio = client.tts.generate("Sannu da zuwa!", speaker="aisha_ha", language="ha")
 audio.save("output.wav")
 ```
 
-> **Important:** For `generate` and `stream`, `voice` is a **speaker ID**
-> (e.g. `ada_pcm`, `adaeze_ig`). Do **not** pass language codes (`ha`, `ig`,
-> `yo`, `pcm`). Use `list_speakers(language="pcm")` to discover speaker IDs.
-> Voice cloning is different: `clone(..., voice="ig")` still takes a language code.
+> **Important:** For `generate` and `stream`:
+> - `voice` / `speaker` = **speaker ID** (e.g. `ada_pcm`, `adaeze_ig`)
+> - `lang` / `language` = **language code** (`ha`, `ig`, `yo`, `pcm`)
+>
+> Do **not** pass language codes as `voice`. Use `list_speakers(language="pcm")`
+> to discover speaker IDs. Voice cloning is different: `clone(..., voice="ig")`
+> still takes a language code (sent as API `lang`).
 
 ---
 
@@ -79,25 +86,29 @@ from naijalingo import NaijaLingo
 
 client = NaijaLingo(api_key="nl-...")
 
-# Basic generation (returns WAV) — pass a speaker ID
-audio = client.tts.generate("How you dey?", voice="ada_pcm")
+# Basic generation (returns WAV) — voice/speaker = speaker ID, lang = language
+audio = client.tts.generate("How you dey?", voice="ada_pcm", lang="pcm")
 audio.save("output.wav")
 
-# Same idea with the optional speaker= alias (takes precedence over voice)
+# speaker= is an alias for voice= (takes precedence when both are set)
 audio = client.tts.generate(
     "Nnoo, kedu ka i mere?",
-    voice="adaeze_ig",
+    speaker="adaeze_ig",
+    language="ig",
 )
 audio.save("adaeze_greeting.wav")
 
 # Raw PCM format
-audio = client.tts.generate("Hello!", voice="ada_pcm", response_format="pcm")
+audio = client.tts.generate(
+    "Hello!", voice="ada_pcm", lang="pcm", response_format="pcm"
+)
 pcm_bytes = audio.content  # raw 16-bit signed LE, 22050 Hz mono
 
 # Export directly to compressed formats like MP3 or FLAC
 audio = client.tts.generate(
     "Make we test compressed audio.",
     voice="ada_pcm",
+    lang="pcm",
     response_format="mp3",
 )
 audio.save("output.mp3")
@@ -106,6 +117,7 @@ audio.save("output.mp3")
 audio = client.tts.generate(
     "Na so life be sometimes.",
     voice="ada_pcm",
+    lang="pcm",
     temperature=0.8,
     top_p=0.9,
     repetition_penalty=1.2,
@@ -119,7 +131,9 @@ For long texts, stream audio chunks as they're generated:
 ```python
 # Stream to a file
 with open("long_speech.wav", "wb") as f:
-    for chunk in client.tts.stream("Very long text here...", voice="ada_pcm"):
+    for chunk in client.tts.stream(
+        "Very long text here...", speaker="ada_pcm", lang="pcm"
+    ):
         f.write(chunk)
 
 # Or collect the full stream
@@ -127,7 +141,7 @@ long_text = """
         Life na one kind journey wey nobody fit fully understand. From the day person open eye for this world, the journey don start.
         Some people go say life na race, some go say na school, others go talk say na battle. But the truth be say life na mixture of many things together. E get sweet time, e get bitter time, e get time wey everything go dey move smooth like fresh engine, and e get time wey everywhere go just scatter like market wey rain beat.
         """
-stream = client.tts.stream(long_text, voice="ada_pcm")
+stream = client.tts.stream(long_text, lang="pcm", speaker="ada_pcm")
 audio = stream.collect()
 audio.save("long_speech.wav")
 ```
@@ -263,7 +277,7 @@ except ValueError as e:
 
 ```python
 with NaijaLingo(api_key="nl-...") as client:
-    audio = client.tts.generate("Bawo ni!", voice="adeola_yo")
+    audio = client.tts.generate("Bawo ni!", voice="adeola_yo", lang="yo")
     audio.save("output.wav")
 # Connection pool is automatically closed
 ```

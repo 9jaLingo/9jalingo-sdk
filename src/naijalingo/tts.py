@@ -28,23 +28,50 @@ def _normalize_lang(code: str) -> str | None:
     return _LANG_ALIASES.get(code.strip().lower())
 
 
-def _resolve_speaker_id(voice: str, speaker: str | None = None) -> str:
-    """Return the speaker ID, rejecting bare language codes with a clear error."""
-    resolved = (speaker if speaker is not None else voice) or ""
-    normalized = resolved.strip().lower()
-    if normalized in _LANGUAGE_CODES:
-        lang = _normalize_lang(normalized) or normalized
+def _resolve_tts_voice_and_lang(
+    voice: str | None = None,
+    speaker: str | None = None,
+    lang: str | None = None,
+    language: str | None = None,
+) -> tuple[str | None, str | None]:
+    """Resolve speech API fields: ``voice``/``speaker`` + ``lang``/``language``.
+
+    Returns ``(speaker_id, lang_code)``. Bare language codes must be passed via
+    ``lang``/``language``, not ``voice``/``speaker``.
+    """
+    resolved_lang = None
+    if lang is not None:
+        resolved_lang = _normalize_lang(lang)
+        if resolved_lang is None:
+            raise ValueError(
+                f"Unsupported language '{lang}'. Use ha, ig, yo, or pcm."
+            )
+    elif language is not None:
+        resolved_lang = _normalize_lang(language)
+        if resolved_lang is None:
+            raise ValueError(
+                f"Unsupported language '{language}'. Use ha, ig, yo, or pcm."
+            )
+
+    # speaker takes precedence over voice (same as the inference API)
+    candidate = speaker if speaker is not None else voice
+    if candidate is None or not str(candidate).strip():
+        return None, resolved_lang
+
+    resolved = str(candidate).strip()
+    normalized = resolved.lower()
+    if normalized in _LANG_ALIASES:
+        lang_code = _LANG_ALIASES[normalized]
         raise ValueError(
             f"'{resolved}' is a language code, not a speaker ID. "
-            f"Pass a speaker like 'ada_pcm', 'adaeze_ig', 'aisha_ha', or 'adeola_yo'. "
-            f"Browse options with: client.tts.list_speakers(language='{lang}')"
+            f"Pass speaker/voice='ada_pcm' (or another speaker ID) and "
+            f"lang='{lang_code}' for the language. "
+            f"Browse speakers with: client.tts.list_speakers(language='{lang_code}')"
         )
-    if not resolved.strip():
-        raise ValueError(
-            "speaker/voice is required. Pass a speaker ID such as 'ada_pcm' "
-            "(not a language code like 'pcm')."
-        )
-    return resolved.strip()
+    if resolved_lang is None and "_" in resolved:
+        # Optional convenience — server also infers lang from speaker suffix
+        resolved_lang = _normalize_lang(resolved.rsplit("_", 1)[-1])
+    return resolved, resolved_lang
 
 
 def _resolve_clone_lang_and_speaker(
@@ -97,7 +124,9 @@ class TTS:
         from naijalingo import NaijaLingo
 
         client = NaijaLingo(api_key="nl-...")
-        audio = client.tts.generate("Bawo ni!", voice="adeola_yo")
+        audio = client.tts.generate(
+            "Bawo ni!", voice="adeola_yo", lang="yo"
+        )
         audio.save("greeting.wav")
     """
 
@@ -110,9 +139,11 @@ class TTS:
         self,
         text: str,
         *,
-        voice: str = "blessing_pcm",
-        model_name: str = _DEFAULT_MODEL_NAME,
+        voice: str | None = None,
         speaker: str | None = None,
+        lang: str | None = None,
+        language: str | None = None,
+        model_name: str = _DEFAULT_MODEL_NAME,
         speaker_embedding: list[float] | None = None,
         response_format: Literal["wav", "pcm"] = "wav",
         temperature: float | None = None,
@@ -126,16 +157,17 @@ class TTS:
 
         Args:
             text: The text to convert to speech.
-            voice: **Speaker ID** (not a language code) — e.g. ``"ada_pcm"``,
+            voice: **Speaker ID** (alias of ``speaker``) — e.g. ``"ada_pcm"``,
                 ``"adaeze_ig"``, ``"aisha_ha"``, ``"adeola_yo"``.
-                Do **not** pass ``"pcm"`` / ``"yo"`` / ``"ha"`` / ``"ig"`` here;
-                those are language filters for ``list_speakers()``.
-                Use ``tts.list_speakers(language="pcm")`` to browse voices.
+                Do **not** pass language codes here; use ``lang`` / ``language``.
                 ``speaker`` takes precedence when both are provided.
+            speaker: Speaker ID (same as ``voice``). Takes precedence over
+                ``voice`` when both are set.
+            lang: Language code — ``"ha"``, ``"ig"``, ``"yo"``, or ``"pcm"``.
+                Optional when the speaker ID already ends in a language suffix.
+            language: Alias of ``lang``.
             model_name: Model ID (e.g. ``"9jalingo-tts-1"``). Defaults to
                 ``"9jalingo-tts-1"``.
-            speaker: Alternative way to pass a speaker ID. Takes precedence
-                over ``voice`` when provided.
             speaker_embedding: Raw 128-dim speaker embedding vector for
                 custom voices (from a previous ``/v1/audio/vcn/clone`` call).
             response_format: ``"wav"`` (default) or ``"pcm"`` (raw 16-bit
@@ -150,10 +182,16 @@ class TTS:
         Returns:
             An :class:`AudioResponse` containing the generated audio bytes.
         """
-        resolved_voice = _resolve_speaker_id(voice, speaker)
+        resolved_voice, resolved_lang = _resolve_tts_voice_and_lang(
+            voice=voice, speaker=speaker, lang=lang, language=language
+        )
+        if resolved_voice is None and speaker_embedding is None:
+            # Match API default speaker when neither speaker nor embedding is set
+            resolved_voice = "blessing_pcm"
         body = self._build_body(
             input=text,
             voice=resolved_voice,
+            lang=resolved_lang,
             model=model_name,
             speaker_embedding=speaker_embedding,
             response_format=response_format,
@@ -172,8 +210,10 @@ class TTS:
         self,
         text: str,
         *,
-        voice: str = "blessing_pcm",
+        voice: str | None = None,
         speaker: str | None = None,
+        lang: str | None = None,
+        language: str | None = None,
         speaker_embedding: list[float] | None = None,
         temperature: float | None = None,
         top_p: float | None = None,
@@ -189,9 +229,11 @@ class TTS:
 
         Args:
             text: The text to convert to speech.
-            voice: **Speaker ID** (e.g. ``"ada_pcm"``), not a language code.
+            voice: **Speaker ID** (alias of ``speaker``), e.g. ``"ada_pcm"``.
                 ``speaker`` takes precedence when both are provided.
-            speaker: Alternative speaker ID — takes precedence over ``voice``.
+            speaker: Speaker ID (same as ``voice``).
+            lang: Language code (``"ha"`` / ``"ig"`` / ``"yo"`` / ``"pcm"``).
+            language: Alias of ``lang``.
             speaker_embedding: Raw 128-dim embedding vector.
             temperature: Sampling temperature.
             top_p: Nucleus sampling threshold.
@@ -203,10 +245,15 @@ class TTS:
         Returns:
             An :class:`AudioStream` yielding WAV byte chunks.
         """
-        resolved_voice = _resolve_speaker_id(voice, speaker)
+        resolved_voice, resolved_lang = _resolve_tts_voice_and_lang(
+            voice=voice, speaker=speaker, lang=lang, language=language
+        )
+        if resolved_voice is None and speaker_embedding is None:
+            resolved_voice = "blessing_pcm"
         body = self._build_body(
             input=text,
             voice=resolved_voice,
+            lang=resolved_lang,
             speaker_embedding=speaker_embedding,
             response_format="wav",
             temperature=temperature,

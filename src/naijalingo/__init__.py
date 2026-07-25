@@ -10,7 +10,7 @@ Quick start::
     from naijalingo import NaijaLingo
 
     client = NaijaLingo(api_key="nl-...")
-    audio = client.tts.generate("Bawo ni!", voice="adeola_yo")
+    audio = client.tts.generate("Bawo ni!", voice="adeola_yo", lang="yo")
     audio.save("greeting.wav")
 
 Environment variables:
@@ -83,12 +83,16 @@ class NaijaLingo:
 
         client = NaijaLingo(api_key="nl-...")
 
-        # Generate speech (voice = speaker ID, not language code)
-        audio = client.tts.generate("Sannu da zuwa!", voice="aisha_ha")
+        # Generate speech (voice/speaker = speaker ID, lang/language = language)
+        audio = client.tts.generate(
+            "Sannu da zuwa!", speaker="aisha_ha", lang="ha"
+        )
         audio.save("output.wav")
 
         # Stream speech
-        for chunk in client.tts.stream("Long text...", voice="ada_pcm"):
+        for chunk in client.tts.stream(
+            "Long text...", voice="ada_pcm", language="pcm"
+        ):
             sys.stdout.buffer.write(chunk)
 
         # List speakers
