@@ -1,7 +1,7 @@
 # 9jaLingo Python SDK
 
 <p align="center">
-  <strong>🇳🇬 The Official Python SDK for <a href="https://www.9jalingo.org">9jaLingo</a> — AI-Powered Text-to-Speech for Nigerian Languages</strong>
+  <strong>🇳🇬 The Official Python SDK for <a href="https://www.9jalingo.org">9jaLingo</a> — AI-Powered Text-to-Speech for African Languages</strong>
 </p>
 
 <p align="center">
@@ -12,11 +12,11 @@
 
 ---
 
-**9jaLingo** is the first AI speech platform built specifically for **Nigerian languages**. This SDK provides a simple, Pythonic interface to the [9jaLingo TTS API](https://www.9jalingo.org), enabling developers to generate natural-sounding speech in **Hausa**, **Igbo**, **Yoruba**, and **Nigerian Pidgin** with over **240+ speaker voices**.
+**9jaLingo** is the first AI speech platform built specifically for **African languages**. This SDK provides a simple, Pythonic interface to the [9jaLingo TTS API](https://www.9jalingo.org), enabling developers to generate natural-sounding speech in **Hausa**, **Igbo**, **Yoruba**, and **Nigerian Pidgin** with over **240+ speaker voices**.
 
 [![Watch the video](https://img.youtube.com/vi/Ib8WVXiwPlU/maxresdefault.jpg)](https://youtu.be/Ib8WVXiwPlU)
 
-Whether you're building voice assistants, accessibility tools, e-learning platforms, audiobook generators, or any application that needs high-quality Nigerian language speech synthesis — 9jaLingo has you covered.
+Whether you're building voice assistants, accessibility tools, e-learning platforms, audiobook generators, or any application that needs high-quality African language speech synthesis — 9jaLingo has you covered.
 
 ### Key Features
 
