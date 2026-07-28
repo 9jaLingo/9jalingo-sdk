@@ -27,5 +27,9 @@ class ServerError(NaijaLingoError):
     """Raised when the API returns a 5xx error."""
 
 
+class InferenceCapacityError(ServerError):
+    """Raised when the inference GPU is waking from scale-to-zero."""
+
+
 class ConnectionError(NaijaLingoError):
     """Raised when unable to connect to the API."""

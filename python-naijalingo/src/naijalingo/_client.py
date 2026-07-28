@@ -10,6 +10,7 @@ import httpx
 from naijalingo._exceptions import (
     AuthenticationError,
     ConnectionError,
+    InferenceCapacityError,
     NaijaLingoError,
     NotFoundError,
     RateLimitError,
@@ -93,7 +94,18 @@ class _BaseClient:
         except Exception:
             detail = response.text
 
-        if status == 401 or status == 403:
+        capacity_message = detail.lower() if isinstance(detail, str) else ""
+        if status == 503 and (
+            "inference capacity" in capacity_message
+            or "inference component has no capacity" in capacity_message
+            or "capacity is starting" in capacity_message
+        ):
+            raise InferenceCapacityError(
+                detail,
+                status_code=status,
+                response=body if isinstance(body, dict) else None,
+            )
+        elif status == 401 or status == 403:
             raise AuthenticationError(detail, status_code=status)
         elif status == 404:
             raise NotFoundError(detail, status_code=status)

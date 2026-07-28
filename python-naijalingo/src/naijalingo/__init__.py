@@ -22,6 +22,7 @@ from naijalingo._client import _BaseClient
 from naijalingo._exceptions import (
     AuthenticationError,
     ConnectionError,
+    InferenceCapacityError,
     NaijaLingoError,
     NotFoundError,
     RateLimitError,
@@ -46,6 +47,7 @@ __all__ = [
     "NaijaLingoError",
     "AuthenticationError",
     "ConnectionError",
+    "InferenceCapacityError",
     "NotFoundError",
     "RateLimitError",
     "ServerError",
