@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+*.log
+.env
+.env.*
+*.wav
+*.mp3
+*.flac
+*.aac
+*.ogg
+*.pcm

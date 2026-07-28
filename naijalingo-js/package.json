@@ -1,0 +1,62 @@
+{
+  "name": "naijalingo",
+  "version": "0.1.0",
+  "description": "Official Node.js SDK for 9jaLingo — AI-powered Text-to-Speech and Voice Cloning for Nigerian languages including Hausa, Igbo, Yoruba, and Nigerian Pidgin with 240+ speaker voices.",
+  "license": "MIT",
+  "author": "9jaLingo <support@9jalingo.org>",
+  "homepage": "https://www.9jalingo.org",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/9jaLingo/9jalingo-sdk.git",
+    "directory": "naijalingo-js"
+  },
+  "bugs": {
+    "url": "https://github.com/9jaLingo/9jalingo-sdk/issues"
+  },
+  "keywords": [
+    "tts",
+    "text-to-speech",
+    "speech-synthesis",
+    "voice-cloning",
+    "nigerian",
+    "african-languages",
+    "hausa",
+    "igbo",
+    "yoruba",
+    "pidgin",
+    "naija",
+    "naijalingo",
+    "9jalingo",
+    "openai-compatible",
+    "voice-ai",
+    "speech-api"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  }
+}
