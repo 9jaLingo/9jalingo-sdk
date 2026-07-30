@@ -1,6 +1,7 @@
 import {
   AuthenticationError,
   ConnectionError,
+  InferenceCapacityError,
   NaijaLingoError,
   NotFoundError,
   RateLimitError,
@@ -34,7 +35,7 @@ export class BaseClient {
     this.timeout = options.timeout ?? DEFAULT_TIMEOUT_MS;
 
     this.defaultHeaders = {
-      "User-Agent": "naijalingo-js/0.1.0",
+      "User-Agent": "naijalingo-js/0.1.1",
     };
     if (this.apiKey) {
       this.defaultHeaders["X-API-Key"] = this.apiKey;
@@ -114,6 +115,14 @@ export class BaseClient {
       detail = await response.text();
     }
 
+    const normalizedDetail = detail.toLowerCase();
+    if (status === 503 && (
+      normalizedDetail.includes("inference capacity")
+      || normalizedDetail.includes("inference component has no capacity")
+      || normalizedDetail.includes("capacity is starting")
+    )) {
+      throw new InferenceCapacityError(detail, status, body);
+    }
     if (status === 401 || status === 403) {
       throw new AuthenticationError(detail, status, body);
     }

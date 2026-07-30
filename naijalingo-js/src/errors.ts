@@ -43,6 +43,14 @@ export class ServerError extends NaijaLingoError {
   }
 }
 
+/** Raised when the inference GPU is waking from scale-to-zero. */
+export class InferenceCapacityError extends ServerError {
+  constructor(message: string, statusCode?: number, response?: unknown) {
+    super(message, statusCode, response);
+    this.name = "InferenceCapacityError";
+  }
+}
+
 /** Raised when unable to connect to the API. */
 export class ConnectionError extends NaijaLingoError {
   constructor(message: string, statusCode?: number, response?: unknown) {
