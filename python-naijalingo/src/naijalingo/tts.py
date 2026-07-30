@@ -202,7 +202,7 @@ class TTS:
             max_chunk_duration=max_chunk_duration,
             silence_duration=silence_duration,
         )
-        content = self._client._post_bytes("/v1/audio/speech", body)
+        content = self._client._post_speech_bytes("/v1/audio/speech", body)
         media_type = "audio/wav" if response_format == "wav" else "application/octet-stream"
         return AudioResponse(content, media_type=media_type)
 

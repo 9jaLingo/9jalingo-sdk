@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import os
+import time
+from datetime import datetime, timezone
 from typing import Any, Iterator
+from urllib.parse import quote
 
 import httpx
 
@@ -36,14 +39,14 @@ class _BaseClient:
         timeout: float = _DEFAULT_TIMEOUT,
     ):
         self.api_key = api_key or os.environ.get("NAIJALINGO_API_KEY", "")
-        resolved_base_url = base_url
+        resolved_base_url = os.environ.get("NAIJALINGO_BASE_URL", base_url)
         self.base_url = resolved_base_url.rstrip("/")
         self.timeout = timeout
 
         # api_key is optional for self-hosted / local vLLM servers that have
         # no authentication middleware. For the managed API (api.9jalingo.org)
         # a key is required and the server will 401 without it.
-        headers: dict[str, str] = {"User-Agent": "naijalingo-python/0.1.0"}
+        headers: dict[str, str] = {"User-Agent": "naijalingo-python/2.0.4"}
         if self.api_key:
             headers["X-API-Key"] = self.api_key
 
@@ -130,6 +133,103 @@ class _BaseClient:
         """POST request with JSON body, returning raw bytes."""
         resp = self._request("POST", path, json=body)
         return resp.content
+
+    @staticmethod
+    def _audio_bytes(response: httpx.Response, *, job: dict | None = None) -> bytes:
+        content_type = response.headers.get("content-type", "").lower()
+        if "json" in content_type:
+            try:
+                body = response.json()
+            except Exception:
+                body = {"detail": response.text}
+            raise ServerError(
+                "The API returned JSON where audio was expected.",
+                status_code=response.status_code,
+                response=body if isinstance(body, dict) else job,
+            )
+        if not response.content:
+            raise ServerError(
+                "The API returned an empty audio response.",
+                status_code=response.status_code,
+                response=job,
+            )
+        return response.content
+
+    def _post_speech_bytes(self, path: str, body: dict) -> bytes:
+        """Generate buffered speech, transparently waiting through a cold start."""
+        response = self._request(
+            "POST",
+            path,
+            json=body,
+            headers={"Prefer": "respond-async-on-cold-start"},
+        )
+        if response.status_code != 202:
+            return self._audio_bytes(response)
+
+        try:
+            queued = response.json()
+        except Exception as exc:
+            raise ServerError(
+                "The API returned an invalid queued TTS response.",
+                status_code=202,
+            ) from exc
+        if not isinstance(queued, dict) or queued.get("status") != "queued":
+            raise ServerError(
+                "The API returned an invalid queued TTS response.",
+                status_code=202,
+                response=queued if isinstance(queued, dict) else None,
+            )
+
+        job_id = str(queued.get("job_id") or "").strip()
+        if not job_id:
+            raise ServerError(
+                "The queued TTS response did not include a job ID.",
+                status_code=202,
+                response=queued,
+            )
+        safe_job_id = quote(job_id, safe="")
+        deadline = time.time() + 45 * 60
+        expires_at = queued.get("expires_at")
+        if isinstance(expires_at, str):
+            try:
+                parsed = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+                if parsed.tzinfo is None:
+                    parsed = parsed.replace(tzinfo=timezone.utc)
+                deadline = parsed.timestamp()
+            except ValueError:
+                pass
+
+        status_body = queued
+        while time.time() < deadline:
+            retry_after = status_body.get("retry_after", queued.get("retry_after", 60))
+            try:
+                delay = max(1.0, min(float(retry_after), 300.0))
+            except (TypeError, ValueError):
+                delay = 60.0
+            time.sleep(delay)
+            status_body = self._get_json(f"/v1/jobs/{safe_job_id}")
+            state = str(status_body.get("status") or "").lower()
+            if state == "completed":
+                audio = self._request("GET", f"/v1/jobs/{safe_job_id}/audio")
+                return self._audio_bytes(audio, job=status_body)
+            if state == "failed":
+                raise ServerError(
+                    str(status_body.get("error") or "Queued TTS generation failed."),
+                    status_code=502,
+                    response=status_body,
+                )
+            if state not in {"queued", "running", "processing"}:
+                raise ServerError(
+                    f"The queued TTS job returned an unknown status: {state or 'missing'}.",
+                    status_code=502,
+                    response=status_body,
+                )
+
+        raise InferenceCapacityError(
+            "Queued TTS generation expired before completion.",
+            status_code=504,
+            response=status_body,
+        )
 
     def _post_stream(self, path: str, body: dict) -> Iterator[bytes]:
         """POST request returning a byte stream (chunked transfer)."""
