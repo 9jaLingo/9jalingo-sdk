@@ -54,9 +54,10 @@ class CloneResponseTests(unittest.TestCase):
         self.assertEqual(clone.clone_id, "clone-uuid-456")
         self.assertEqual(clone.job_id, "job-uuid-789")
 
-        self.tts.generate("Use the cloned voice", voice=clone.voice_id)
+        generated_audio = self.tts.generate("Use the cloned voice", voice=clone.voice_id)
         self.tts.generate("Use the cloned speaker", speaker=clone.voice_id)
 
+        self.assertEqual(len(generated_audio), len(b"RIFFgenerated-audio"))
         generated_bodies = [
             request.read().decode()
             for request in self.requests

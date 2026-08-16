@@ -449,6 +449,12 @@ class AudioResponse:
         self.content = content
         self.media_type = media_type
 
+    def __len__(self) -> int:
+        return len(self.content)
+
+    def __repr__(self) -> str:
+        return f"AudioResponse({len(self.content)} bytes, {self.media_type})"
+
     def save(self, path: str | Path) -> Path:
         """Write the audio to a file.
 
@@ -494,12 +500,6 @@ class CloneResponse(AudioResponse):
         self.voice_name = voice_name
         self.clone_id = clone_id
         self.job_id = job_id
-
-    def __len__(self) -> int:
-        return len(self.content)
-
-    def __repr__(self) -> str:
-        return f"AudioResponse({len(self.content)} bytes, {self.media_type})"
 
 
 class AudioStream:
