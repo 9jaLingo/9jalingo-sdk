@@ -84,6 +84,34 @@ export class AudioResponse {
   }
 }
 
+/** Audio and reusable voice metadata returned from a clone request. */
+export class CloneResponse extends AudioResponse {
+  readonly voiceId: string | null;
+  readonly voiceCode: string | null;
+  readonly voiceName: string | null;
+  readonly cloneId: string | null;
+  readonly jobId: string | null;
+
+  constructor(
+    content: Uint8Array,
+    mediaType: string,
+    metadata: {
+      voiceId: string | null;
+      voiceCode: string | null;
+      voiceName: string | null;
+      cloneId: string | null;
+      jobId: string | null;
+    },
+  ) {
+    super(content, mediaType);
+    this.voiceId = metadata.voiceId;
+    this.voiceCode = metadata.voiceCode;
+    this.voiceName = metadata.voiceName;
+    this.cloneId = metadata.cloneId;
+    this.jobId = metadata.jobId;
+  }
+}
+
 /** Streaming audio response — yields byte chunks as they arrive. */
 export class AudioStream implements AsyncIterable<Uint8Array> {
   private readonly chunks: AsyncIterable<Uint8Array>;
@@ -186,7 +214,7 @@ export class TTS {
     text: string,
     audioFile: string | Buffer | Uint8Array | Blob,
     options: CloneOptions = {},
-  ): Promise<AudioResponse> {
+  ): Promise<CloneResponse> {
     const voice = options.voice ?? "pcm";
     const [resolvedLang, resolvedSpeaker] = resolveCloneLangAndSpeaker(
       voice,
@@ -215,9 +243,16 @@ export class TTS {
     const { blob, filename } = await toAudioBlob(audioFile);
     form.append("audio", blob, filename);
 
-    const content = await this.client.postMultipart("/v1/audio/clone", form);
+    const response = await this.client.postMultipart("/v1/audio/clone", form);
+    const content = new Uint8Array(await response.arrayBuffer());
     const mediaType = MEDIA_TYPES[responseFormat] ?? "application/octet-stream";
-    return new AudioResponse(content, mediaType);
+    return new CloneResponse(content, mediaType, {
+      voiceId: response.headers.get("X-Voice-ID"),
+      voiceCode: response.headers.get("X-Voice-Code"),
+      voiceName: response.headers.get("X-Voice-Name"),
+      cloneId: response.headers.get("X-Clone-ID"),
+      jobId: response.headers.get("X-Job-ID"),
+    });
   }
 
   async listSpeakers(

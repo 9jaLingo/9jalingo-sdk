@@ -39,7 +39,7 @@ from naijalingo._types import (
     Speaker,
     SpeakerList,
 )
-from naijalingo.tts import TTS, AudioResponse, AudioStream
+from naijalingo.tts import TTS, AudioResponse, AudioStream, CloneResponse
 
 __all__ = [
     "NaijaLingo",
@@ -54,6 +54,7 @@ __all__ = [
     # Types
     "AudioResponse",
     "AudioStream",
+    "CloneResponse",
     "Speaker",
     "SpeakerList",
     "Language",
@@ -67,7 +68,7 @@ __all__ = [
     "TTS",
 ]
 
-__version__ = "2.0.4"
+__version__ = "2.0.5"
 
 
 class NaijaLingo:

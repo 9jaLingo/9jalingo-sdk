@@ -35,7 +35,7 @@ export class BaseClient {
     this.timeout = options.timeout ?? DEFAULT_TIMEOUT_MS;
 
     this.defaultHeaders = {
-      "User-Agent": "naijalingo-js/0.1.1",
+      "User-Agent": "naijalingo-js/0.1.2",
     };
     if (this.apiKey) {
       this.defaultHeaders["X-API-Key"] = this.apiKey;
@@ -234,13 +234,12 @@ export class BaseClient {
     path: string,
     form: FormData,
     timeoutMs?: number,
-  ): Promise<Uint8Array> {
-    const resp = await this.request("POST", path, {
+  ): Promise<Response> {
+    return this.request("POST", path, {
       body: form,
       timeoutMs: timeoutMs ?? Math.max(this.timeout, 600_000),
       // Let fetch set multipart boundary — do not set Content-Type
     });
-    return new Uint8Array(await resp.arrayBuffer());
   }
 }
 

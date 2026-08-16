@@ -160,6 +160,13 @@ audio = client.tts.clone(
 )
 audio.save("cloned.mp3")
 
+# Reuse the persisted clone as either voice or speaker.
+audio = client.tts.generate(
+    "Nnoo, kedu ka i mere?",
+    voice=audio.voice_id,
+)
+audio.save("cloned_voice_greeting.wav")
+
 # From a file-like object
 with open("reference.wav", "rb") as f:
     audio = client.tts.clone("Hello!", audio_file=f, voice="pcm")

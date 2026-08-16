@@ -27,7 +27,7 @@ import {
   type ServiceInfo,
 } from "./types.js";
 
-export const VERSION = "0.1.1";
+export const VERSION = "0.1.2";
 
 export {
   AuthenticationError,
@@ -42,6 +42,7 @@ export {
 export {
   AudioResponse,
   AudioStream,
+  CloneResponse,
   TTS,
   type CloneOptions,
   type GenerateOptions,

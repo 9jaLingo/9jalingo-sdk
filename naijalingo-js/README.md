@@ -145,6 +145,14 @@ const audio = await client.tts.clone(
 );
 await audio.save("cloned.mp3");
 
+// The backend persists the clone and returns a reusable voice ID.
+const greeting = await client.tts.generate("Nnoo, kedu ka i mere?", {
+  voice: audio.voiceId,
+});
+await greeting.save("cloned_voice_greeting.wav");
+
+// `speaker: audio.voiceId` is equivalent.
+
 // From a Buffer
 import { readFileSync } from "node:fs";
 const buf = readFileSync("reference.wav");

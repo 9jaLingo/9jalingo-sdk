@@ -255,13 +255,12 @@ class _BaseClient:
                     continue
                 raise ConnectionError(f"Request timed out: {exc}") from exc
 
-    def _post_multipart(self, path: str, data: dict, files: dict) -> bytes:
-        """POST multipart/form-data, returning raw bytes."""
-        resp = self._request(
+    def _post_multipart(self, path: str, data: dict, files: dict) -> httpx.Response:
+        """POST multipart/form-data, returning the validated response."""
+        return self._request(
             "POST", path, data=data, files=files,
             timeout=httpx.Timeout(max(self.timeout, 600), connect=10.0),
         )
-        return resp.content
 
     def close(self) -> None:
         """Close the underlying HTTP connection pool."""

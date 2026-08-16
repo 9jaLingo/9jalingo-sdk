@@ -279,7 +279,7 @@ class TTS:
         top_p: float | None = None,
         repetition_penalty: float | None = None,
         response_format: Literal["wav", "pcm", "flac", "aac", "ogg", "mp3", "alac"] = "wav",
-    ) -> AudioResponse:
+    ) -> CloneResponse:
         """Generate speech using a cloned voice from a reference audio file.
 
         Args:
@@ -304,7 +304,8 @@ class TTS:
             response_format: ``"wav"``, ``"pcm"``, ``"flac"``, ``"aac"``, ``"ogg"``, ``"mp3"``, or ``"alac"``.
 
         Returns:
-            An :class:`AudioResponse` containing the generated audio bytes.
+            A :class:`CloneResponse` containing the generated audio bytes and
+            the reusable cloned voice ID.
         """
         if isinstance(audio_file, (str, Path)):
             path = Path(audio_file)
@@ -341,7 +342,7 @@ class TTS:
             mime_type = mime_type or "application/octet-stream"
 
             files = {"audio": (filename, file_obj, mime_type)}
-            content = self._client._post_multipart("/v1/audio/clone", data=data, files=files)
+            response = self._client._post_multipart("/v1/audio/clone", data=data, files=files)
         finally:
             if should_close:
                 file_obj.close()
@@ -355,7 +356,15 @@ class TTS:
             "mp3": "audio/mpeg",
             "alac": "audio/alac",
         }.get(response_format, "application/octet-stream")
-        return AudioResponse(content, media_type=media_type)
+        return CloneResponse(
+            self._client._audio_bytes(response),
+            media_type=media_type,
+            voice_id=response.headers.get("X-Voice-ID"),
+            voice_code=response.headers.get("X-Voice-Code"),
+            voice_name=response.headers.get("X-Voice-Name"),
+            clone_id=response.headers.get("X-Clone-ID"),
+            job_id=response.headers.get("X-Job-ID"),
+        )
 
     # ── Speakers ─────────────────────────────────────────────────
 
@@ -457,6 +466,34 @@ class AudioResponse:
     def to_bytes_io(self) -> io.BytesIO:
         """Return audio wrapped in a :class:`~io.BytesIO` buffer."""
         return io.BytesIO(self.content)
+
+
+class CloneResponse(AudioResponse):
+    """Audio and reusable voice metadata returned by a clone request.
+
+    Use :attr:`voice_id` as either ``voice`` or ``speaker`` in a subsequent
+    :meth:`TTS.generate` or :meth:`TTS.stream` request.
+    """
+
+    __slots__ = ("voice_id", "voice_code", "voice_name", "clone_id", "job_id")
+
+    def __init__(
+        self,
+        content: bytes,
+        *,
+        media_type: str = "audio/wav",
+        voice_id: str | None = None,
+        voice_code: str | None = None,
+        voice_name: str | None = None,
+        clone_id: str | None = None,
+        job_id: str | None = None,
+    ):
+        super().__init__(content, media_type=media_type)
+        self.voice_id = voice_id
+        self.voice_code = voice_code
+        self.voice_name = voice_name
+        self.clone_id = clone_id
+        self.job_id = job_id
 
     def __len__(self) -> int:
         return len(self.content)
