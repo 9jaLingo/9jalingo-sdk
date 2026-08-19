@@ -402,6 +402,20 @@ class TTS:
         data = self._client._get_json(f"/v1/speakers/{speaker_id}")
         return Speaker.from_dict(data)
 
+    def delete_voice(self, voice_id: str) -> None:
+        """Permanently delete a cloned voice owned by this API key.
+
+        Args:
+            voice_id: The UUID returned by :meth:`clone`.
+
+        Raises:
+            NotFoundError: If the voice does not exist or is not owned by the API key.
+        """
+        normalized_voice_id = voice_id.strip()
+        if not normalized_voice_id:
+            raise ValueError("voice_id is required")
+        self._client._request("DELETE", f"/v1/voices/{normalized_voice_id}")
+
     # ── Languages ────────────────────────────────────────────────
 
     def list_languages(self) -> LanguageList:

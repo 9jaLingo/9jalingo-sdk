@@ -271,6 +271,15 @@ export class TTS {
     return speakerFromDict(data);
   }
 
+  /** Permanently delete a cloned voice owned by this API key. */
+  async deleteVoice(voiceId: string): Promise<void> {
+    const normalizedVoiceId = voiceId.trim();
+    if (!normalizedVoiceId) {
+      throw new Error("voiceId is required");
+    }
+    await this.client.delete(`/v1/voices/${encodeURIComponent(normalizedVoiceId)}`);
+  }
+
   async listLanguages(): Promise<LanguageList> {
     const data = await this.client.getJson("/v1/languages");
     return languageListFromDict(data);

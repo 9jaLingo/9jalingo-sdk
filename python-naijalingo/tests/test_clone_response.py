@@ -26,6 +26,8 @@ class CloneResponseTests(unittest.TestCase):
                         "X-Job-ID": "job-uuid-789",
                     },
                 )
+            if request.url.path == "/v1/voices/voice-uuid-123":
+                return httpx.Response(204)
             return httpx.Response(
                 200,
                 content=b"RIFFgenerated-audio",
@@ -65,6 +67,14 @@ class CloneResponseTests(unittest.TestCase):
         ]
         self.assertEqual(len(generated_bodies), 2)
         self.assertTrue(all('"voice":"voice-uuid-123"' in body for body in generated_bodies))
+
+    def test_delete_voice_deletes_cloned_voice_id(self):
+        self.tts.delete_voice("voice-uuid-123")
+
+        request = self.requests[-1]
+        self.assertEqual(request.method, "DELETE")
+        self.assertEqual(request.url.path, "/v1/voices/voice-uuid-123")
+        self.assertEqual(request.headers["X-API-Key"], "test-key")
 
 
 if __name__ == "__main__":
