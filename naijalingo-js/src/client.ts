@@ -241,6 +241,10 @@ export class BaseClient {
       // Let fetch set multipart boundary — do not set Content-Type
     });
   }
+
+  async delete(path: string): Promise<void> {
+    await this.request("DELETE", path);
+  }
 }
 
 function sleep(ms: number): Promise<void> {
