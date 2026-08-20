@@ -167,6 +167,9 @@ audio = client.tts.generate(
 )
 audio.save("cloned_voice_greeting.wav")
 
+# Permanently delete the cloned voice when consent is withdrawn.
+client.tts.delete_voice(audio.voice_id)
+
 # From a file-like object
 with open("reference.wav", "rb") as f:
     audio = client.tts.clone("Hello!", audio_file=f, voice="pcm")

@@ -2,6 +2,24 @@
 
 Official client libraries for the [9jaLingo](https://www.9jalingo.org) API — Text-to-Speech and Voice Cloning for Hausa, Igbo, Yoruba, and Nigerian Pidgin.
 
+---
+
+[![Watch the video](https://img.youtube.com/vi/Ib8WVXiwPlU/maxresdefault.jpg)](https://youtu.be/Ib8WVXiwPlU)
+
+Whether you're building voice assistants, accessibility tools, e-learning platforms, audiobook generators, or any application that needs high-quality African language speech synthesis — 9jaLingo has you covered.
+
+### Key Features
+
+- 🗣️ **Text-to-Speech** — Convert text to natural speech in 4 Nigerian languages
+- 🎭 **240+ Speaker Voices** — Choose from a diverse library of male and female voices
+- 🔊 **Voice Cloning** — Clone any voice from a short reference audio sample (WAV, MP3, M4A, etc.)
+- 🎧 **Multi-Format Output** — Export speech natively to WAV, PCM, MP3, FLAC, AAC, ALAC, or OGG
+- 📡 **Streaming** — Stream audio chunks as they're generated for real-time playback
+- ⚡ **Long-Form Generation** — Automatically handles long texts with intelligent chunking
+- 🤖 **OpenAI-Compatible** — Drop-in replacement for OpenAI TTS with Nigerian language support
+
+---
+
 | SDK | Directory | Install |
 |-----|-----------|---------|
 | **Python** | [`python-naijalingo/`](python-naijalingo/) | `pip install naijalingo` |

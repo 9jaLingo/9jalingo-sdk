@@ -153,6 +153,9 @@ await greeting.save("cloned_voice_greeting.wav");
 
 // `speaker: audio.voiceId` is equivalent.
 
+// Permanently delete the cloned voice when consent is withdrawn.
+await client.tts.deleteVoice(audio.voiceId);
+
 // From a Buffer
 import { readFileSync } from "node:fs";
 const buf = readFileSync("reference.wav");
