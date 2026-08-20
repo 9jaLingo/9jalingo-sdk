@@ -27,3 +27,9 @@ Thumbs.db
 # Generated audio
 *.mp3
 *.pcm
+
+#test files
+test_output/
+tests/
+test/
+tests

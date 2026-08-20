@@ -1,6 +1,6 @@
 {
   "name": "naijalingo",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Official Node.js SDK for 9jaLingo — AI-powered Text-to-Speech and Voice Cloning for Nigerian languages including Hausa, Igbo, Yoruba, and Nigerian Pidgin with 240+ speaker voices.",
   "license": "MIT",
   "author": "9jaLingo <support@9jalingo.org>",

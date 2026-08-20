@@ -55,7 +55,7 @@ def test_speech_polls_queued_job_and_downloads_audio_with_api_key():
         audio = client._post_speech_bytes("/v1/audio/speech", {"input": "hello"})
 
     assert audio == b"RIFFdone"
-    assert [request.url.path for request in requests] == [
+    assert [request.url.raw_path.decode() for request in requests] == [
         "/v1/audio/speech",
         "/v1/jobs/job%2Funsafe",
         "/v1/jobs/job%2Funsafe",
