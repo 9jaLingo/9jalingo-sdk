@@ -46,6 +46,8 @@ audio.save("greeting.wav")
 **Go**
 
 ```bash
+# Run in your application directory. `go get` requires a Go module.
+go mod init example.com/my-9jalingo-app
 go get github.com/9jaLingo/9jalingo-sdk/naijalingo-go
 export NAIJALINGO_API_KEY="YOUR_API_KEY"
 ```
