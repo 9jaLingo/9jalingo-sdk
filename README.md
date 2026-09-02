@@ -24,6 +24,7 @@ Whether you're building voice assistants, accessibility tools, e-learning platfo
 |-----|-----------|---------|
 | **Python** | [`python-naijalingo/`](python-naijalingo/) | `pip install naijalingo` |
 | **Node.js** | [`naijalingo-js/`](naijalingo-js/) | `npm install naijalingo` |
+| **Go** | [`naijalingo-go/`](naijalingo-go/) | `go get github.com/9jaLingo/naijalingo-go` |
 
 ## Quick start
 
@@ -40,6 +41,22 @@ from naijalingo import NaijaLingo
 client = NaijaLingo()
 audio = client.tts.generate("Bawo ni!", voice="adeola_yo", lang="yo")
 audio.save("greeting.wav")
+```
+
+**Go**
+
+```bash
+go get github.com/9jaLingo/naijalingo-go
+export NAIJALINGO_API_KEY="YOUR_API_KEY"
+```
+
+```go
+client := naijalingo.NewClient(naijalingo.ClientOptions{})
+audio, err := client.TTS.Generate(context.Background(), "Bawo ni!", naijalingo.GenerateOptions{
+  Voice: "adeola_yo", Lang: "yo",
+})
+if err != nil { log.Fatal(err) }
+os.WriteFile("greeting.wav", audio.Content, 0o644)
 ```
 
 **Node.js**
@@ -64,6 +81,6 @@ await audio.save("greeting.wav");
 
 - [Website](https://www.9jalingo.org)
 - [API documentation](https://www.9jalingo.org/api-documentation)
-- [PyPI](https://pypi.org/project/naijalingo/) · [npm](https://www.npmjs.com/package/naijalingo)
+- [PyPI](https://pypi.org/project/naijalingo/) · [npm](https://www.npmjs.com/package/naijalingo) · [pkg.go.dev](https://pkg.go.dev/github.com/9jaLingo/naijalingo-go)
 
 Get an API key from the [dashboard](https://9jalingo.org/dashboard).
