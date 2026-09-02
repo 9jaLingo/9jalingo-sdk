@@ -5,7 +5,7 @@ Official Go client for the 9jaLingo Text-to-Speech and voice-cloning API.
 ## Install
 
 ```bash
-go get github.com/9jaLingo/naijalingo-go
+go get github.com/9jaLingo/9jalingo-sdk/naijalingo-go
 export NAIJALINGO_API_KEY="YOUR_API_KEY"
 ```
 
@@ -21,7 +21,7 @@ import (
     "log"
     "os"
 
-    naijalingo "github.com/9jaLingo/naijalingo-go"
+    naijalingo "github.com/9jaLingo/9jalingo-sdk/naijalingo-go"
 )
 
 func main() {

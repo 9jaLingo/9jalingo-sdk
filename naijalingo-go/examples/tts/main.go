@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	naijalingo "github.com/9jaLingo/naijalingo-go"
+	naijalingo "github.com/9jaLingo/9jalingo-sdk/naijalingo-go"
 )
 
 func main() {

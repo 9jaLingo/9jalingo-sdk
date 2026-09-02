@@ -24,7 +24,7 @@ Whether you're building voice assistants, accessibility tools, e-learning platfo
 |-----|-----------|---------|
 | **Python** | [`python-naijalingo/`](python-naijalingo/) | `pip install naijalingo` |
 | **Node.js** | [`naijalingo-js/`](naijalingo-js/) | `npm install naijalingo` |
-| **Go** | [`naijalingo-go/`](naijalingo-go/) | `go get github.com/9jaLingo/naijalingo-go` |
+| **Go** | [`naijalingo-go/`](naijalingo-go/) | `go get github.com/9jaLingo/9jalingo-sdk/naijalingo-go` |
 
 ## Quick start
 
@@ -46,7 +46,7 @@ audio.save("greeting.wav")
 **Go**
 
 ```bash
-go get github.com/9jaLingo/naijalingo-go
+go get github.com/9jaLingo/9jalingo-sdk/naijalingo-go
 export NAIJALINGO_API_KEY="YOUR_API_KEY"
 ```
 
@@ -81,6 +81,6 @@ await audio.save("greeting.wav");
 
 - [Website](https://www.9jalingo.org)
 - [API documentation](https://www.9jalingo.org/api-documentation)
-- [PyPI](https://pypi.org/project/naijalingo/) · [npm](https://www.npmjs.com/package/naijalingo) · [pkg.go.dev](https://pkg.go.dev/github.com/9jaLingo/naijalingo-go)
+- [PyPI](https://pypi.org/project/naijalingo/) · [npm](https://www.npmjs.com/package/naijalingo) · [pkg.go.dev](https://pkg.go.dev/github.com/9jaLingo/9jalingo-sdk/naijalingo-go)
 
 Get an API key from the [dashboard](https://9jalingo.org/dashboard).
