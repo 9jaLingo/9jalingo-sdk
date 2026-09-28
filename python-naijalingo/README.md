@@ -79,6 +79,20 @@ audio.save("output.wav")
 
 ## API Reference
 
+### Speech-to-Text
+
+```python
+transcript = client.stt.transcribe(
+    "https://cdn.example.com/pidgin-sample.wav",
+    language="pcm",
+    duration_seconds=8.1,
+)
+print(transcript.text, transcript.language, transcript.duration)
+```
+
+The audio URL must be publicly reachable and your API key must have the `stt`
+scope. Supported language hints are `yo`, `ha`, `ig`, `pcm`, and `en`.
+
 ### Text-to-Speech
 
 ```python

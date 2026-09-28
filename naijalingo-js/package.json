@@ -1,7 +1,7 @@
 {
   "name": "naijalingo",
   "version": "0.2.0",
-  "description": "Official Node.js SDK for 9jaLingo — AI-powered Text-to-Speech and Voice Cloning for Nigerian languages including Hausa, Igbo, Yoruba, and Nigerian Pidgin with 240+ speaker voices.",
+  "description": "Official Node.js SDK for 9jaLingo — Text-to-Speech, Speech-to-Text, and Voice Cloning for Nigerian languages.",
   "license": "MIT",
   "author": "9jaLingo <support@9jalingo.org>",
   "homepage": "https://www.9jalingo.org",
@@ -15,6 +15,8 @@
   },
   "keywords": [
     "tts",
+    "stt",
+    "speech-to-text",
     "text-to-speech",
     "speech-synthesis",
     "voice-cloning",

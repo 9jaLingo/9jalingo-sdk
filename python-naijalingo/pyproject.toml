@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "naijalingo"
 version = "2.1.0"
-description = "Official Python SDK for 9jaLingo — AI-powered Text-to-Speech and Voice Cloning for Nigerian languages including Hausa, Igbo, Yoruba, and Nigerian Pidgin with 240+ speaker voices."
+description = "Official Python SDK for 9jaLingo — Text-to-Speech, Speech-to-Text, and Voice Cloning for Nigerian languages."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
@@ -14,6 +14,8 @@ authors = [
 ]
 keywords = [
     "tts",
+    "stt",
+    "speech-to-text",
     "text-to-speech",
     "speech-synthesis",
     "voice-cloning",

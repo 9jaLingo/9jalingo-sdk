@@ -1,6 +1,7 @@
 # 9jaLingo Go SDK
 
-Official Go client for the 9jaLingo Text-to-Speech and voice-cloning API.
+Official Go client for the 9jaLingo Text-to-Speech, Speech-to-Text, and
+voice-cloning API.
 
 ## Install
 
@@ -46,6 +47,23 @@ Run the included end-to-end example:
 export NAIJALINGO_API_KEY="YOUR_API_KEY"
 go run ./examples/tts
 ```
+
+## Speech-to-Text
+
+```go
+transcript, err := client.STT.Transcribe(
+    context.Background(),
+    "https://cdn.example.com/pidgin-sample.wav",
+    naijalingo.TranscribeOptions{Language: "pcm", DurationSeconds: 8.1},
+)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println(transcript.Text, transcript.Language, transcript.Duration)
+```
+
+The audio URL must be publicly reachable and your API key must have the `stt`
+scope. Supported language hints are `yo`, `ha`, `ig`, `pcm`, and `en`.
 
 For an offline request/response check that works directly in GoLand, run `go test ./...`.
 

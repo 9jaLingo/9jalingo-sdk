@@ -74,6 +74,19 @@ const client = new NaijaLingo({ apiKey: "YOUR_API_KEY" });
 
 ## API Reference
 
+### Speech-to-Text
+
+```ts
+const transcript = await client.stt.transcribe(
+  "https://cdn.example.com/pidgin-sample.wav",
+  { language: "pcm", durationSeconds: 8.1 },
+);
+console.log(transcript.text, transcript.language, transcript.duration);
+```
+
+The audio URL must be publicly reachable and your API key must have the `stt`
+scope. Supported language hints are `yo`, `ha`, `ig`, `pcm`, and `en`.
+
 ### Text-to-Speech
 
 ```ts
