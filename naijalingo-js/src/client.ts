@@ -166,6 +166,14 @@ export class BaseClient {
     return new Uint8Array(await resp.arrayBuffer());
   }
 
+  async postJson(path: string, body: Record<string, unknown>): Promise<Record<string, unknown>> {
+    const resp = await this.request("POST", path, {
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    return (await resp.json()) as Record<string, unknown>;
+  }
+
   async *postStream(
     path: string,
     body: Record<string, unknown>,

@@ -40,6 +40,7 @@ from naijalingo._types import (
     SpeakerList,
 )
 from naijalingo.tts import TTS, AudioResponse, AudioStream, CloneResponse
+from naijalingo.stt import STT, Transcription
 
 __all__ = [
     "NaijaLingo",
@@ -66,6 +67,8 @@ __all__ = [
     "ServiceInfo",
     # Resources
     "TTS",
+    "STT",
+    "Transcription",
 ]
 
 __version__ = "2.0.5"
@@ -134,6 +137,7 @@ class NaijaLingo:
     ):
         self._client = _BaseClient(api_key=api_key, base_url=base_url, timeout=timeout)
         self.tts = TTS(self._client)
+        self.stt = STT(self._client)
 
     # ── Model endpoints ──────────────────────────────────────────
 

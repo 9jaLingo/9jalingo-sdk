@@ -18,6 +18,7 @@
 
 import { BaseClient, type ClientOptions } from "./client.js";
 import { TTS } from "./tts.js";
+import { STT } from "./stt.js";
 import {
   apiInfoFromDict,
   modelListFromDict,
@@ -49,6 +50,7 @@ export {
   type ListSpeakersOptions,
   type StreamOptions,
 } from "./tts.js";
+export { STT, type TranscribeOptions, type Transcription } from "./stt.js";
 
 export type {
   APIInfo,
@@ -68,10 +70,12 @@ export type { ClientOptions };
 export class NaijaLingo {
   private readonly _client: BaseClient;
   readonly tts: TTS;
+  readonly stt: STT;
 
   constructor(options: ClientOptions = {}) {
     this._client = new BaseClient(options);
     this.tts = new TTS(this._client);
+    this.stt = new STT(this._client);
   }
 
   /** List available TTS models. GET /v1/models */

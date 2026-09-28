@@ -27,6 +27,7 @@ type Client struct {
 	baseURL    string
 	httpClient *http.Client
 	TTS        *TTSService
+	STT        *STTService
 }
 
 // NewClient creates a client. APIKey and BaseURL fall back to NAIJALINGO_API_KEY
@@ -53,6 +54,7 @@ func NewClient(options ClientOptions) *Client {
 		httpClient: httpClient,
 	}
 	client.TTS = &TTSService{client: client}
+	client.STT = &STTService{client: client}
 	return client
 }
 

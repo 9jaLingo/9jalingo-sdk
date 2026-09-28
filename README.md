@@ -17,6 +17,7 @@ Whether you're building voice assistants, accessibility tools, e-learning platfo
 - 📡 **Streaming** — Stream audio chunks as they're generated for real-time playback
 - ⚡ **Long-Form Generation** — Automatically handles long texts with intelligent chunking
 - 🤖 **OpenAI-Compatible** — Drop-in replacement for OpenAI TTS with Nigerian language support
+- 📝 **Speech-to-Text** — Transcribe publicly hosted Nigerian-language audio through `client.stt`
 
 ---
 
@@ -77,6 +78,40 @@ const audio = await client.tts.generate("Bawo ni!", {
   lang: "yo",
 });
 await audio.save("greeting.wav");
+```
+
+## Speech-to-Text
+
+STT audio must be available at a public HTTPS URL. Each request needs an API key
+with the `stt` scope and the actual audio duration for billing.
+
+**Python**
+
+```python
+transcript = client.stt.transcribe(
+    "https://cdn.example.com/pidgin-sample.wav",
+    language="pcm",
+    duration_seconds=8.1,
+)
+print(transcript.text, transcript.language)
+```
+
+**Node.js**
+
+```ts
+const transcript = await client.stt.transcribe(
+  "https://cdn.example.com/pidgin-sample.wav",
+  { language: "pcm", durationSeconds: 8.1 },
+);
+console.log(transcript.text, transcript.language);
+```
+
+**Go**
+
+```go
+transcript, err := client.STT.Transcribe(ctx, "https://cdn.example.com/pidgin-sample.wav", naijalingo.TranscribeOptions{Language: "pcm", DurationSeconds: 8.1})
+if err != nil { log.Fatal(err) }
+fmt.Println(transcript.Text, transcript.Language)
 ```
 
 ## Links
