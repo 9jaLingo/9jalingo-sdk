@@ -63,7 +63,7 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body io.Re
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "naijalingo-go/0.1.0")
+	req.Header.Set("User-Agent", "naijalingo-go/0.2.2")
 	if c.apiKey != "" {
 		req.Header.Set("X-API-Key", c.apiKey)
 	}

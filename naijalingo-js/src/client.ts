@@ -2,6 +2,7 @@ import {
   AuthenticationError,
   ConnectionError,
   InferenceCapacityError,
+  InvalidRequestError,
   NaijaLingoError,
   NotFoundError,
   RateLimitError,
@@ -35,7 +36,7 @@ export class BaseClient {
     this.timeout = options.timeout ?? DEFAULT_TIMEOUT_MS;
 
     this.defaultHeaders = {
-      "User-Agent": "naijalingo-js/0.1.2",
+      "User-Agent": "naijalingo-js/0.2.2",
     };
     if (this.apiKey) {
       this.defaultHeaders["X-API-Key"] = this.apiKey;
@@ -128,6 +129,9 @@ export class BaseClient {
     }
     if (status === 404) {
       throw new NotFoundError(detail, status, body);
+    }
+    if ([400, 413, 415, 422].includes(status)) {
+      throw new InvalidRequestError(detail, status, body);
     }
     if (status === 429) {
       throw new RateLimitError(detail, status, body);

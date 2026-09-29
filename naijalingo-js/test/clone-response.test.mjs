@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { NaijaLingo } from "../dist/index.js";
+import { InvalidRequestError, NaijaLingo, ServerError } from "../dist/index.js";
 
 test("clone returns reusable voice metadata", async () => {
   const originalFetch = globalThis.fetch;
@@ -74,6 +74,40 @@ test("deleteVoice deletes the cloned voice ID", async () => {
     assert.equal(new URL(requests[0].url).pathname, "/v1/voices/voice-uuid-123");
     assert.equal(requests[0].init.method, "DELETE");
     assert.equal(requests[0].init.headers["X-API-Key"], "test-key");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("STT maps broken audio URLs to InvalidRequestError", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () =>
+    Response.json({ detail: "Audio URL returned HTTP 404." }, { status: 422 });
+
+  try {
+    const client = new NaijaLingo({ baseUrl: "https://api.test", apiKey: "test-key" });
+    await assert.rejects(
+      client.stt.transcribe("https://audio.example/missing.wav", { language: "yo" }),
+      (error) => error instanceof InvalidRequestError && error.statusCode === 422 && /HTTP 404/.test(error.message),
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("STT rejects embedded error and malformed success responses", async () => {
+  const originalFetch = globalThis.fetch;
+  const bodies = [
+    { result: { error: "Model failed" } },
+    { error: "Model failed", result: { text: "ignored success" } },
+    { result: { text: null } },
+  ];
+  globalThis.fetch = async () => Response.json(bodies.shift());
+
+  try {
+    const client = new NaijaLingo({ baseUrl: "https://api.test", apiKey: "test-key" });
+    await assert.rejects(client.stt.transcribe("https://audio.example/sample.wav"), ServerError);
+    await assert.rejects(client.stt.transcribe("https://audio.example/sample.wav"), ServerError);
   } finally {
     globalThis.fetch = originalFetch;
   }

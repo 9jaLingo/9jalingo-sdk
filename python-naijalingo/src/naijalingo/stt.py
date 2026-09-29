@@ -32,12 +32,21 @@ class STT:
             body["language"] = language
         response = self._client._post_json("/v1/audio/transcriptions", body)
         result = response
-        while isinstance(result, dict) and isinstance(result.get("result"), dict):
-            result = result["result"]
-        if isinstance(result, dict) and result.get("error"):
-            raise ServerError(str(result["error"]), status_code=502, response=result)
+        while isinstance(result, dict):
+            if result.get("error"):
+                raise ServerError(str(result["error"]), status_code=502, response=result)
+            nested = result.get("result")
+            if not isinstance(nested, dict):
+                break
+            result = nested
+        if not isinstance(result, dict) or not isinstance(result.get("text"), str):
+            raise ServerError(
+                "The API returned an invalid transcription response.",
+                status_code=502,
+                response=response,
+            )
         return Transcription(
-            text=str(result.get("text", "")),
+            text=result["text"],
             language=result.get("language"),
             duration=result.get("duration"),
             model=result.get("model"),

@@ -23,6 +23,7 @@ from naijalingo._exceptions import (
     AuthenticationError,
     ConnectionError,
     InferenceCapacityError,
+    InvalidRequestError,
     NaijaLingoError,
     NotFoundError,
     RateLimitError,
@@ -49,6 +50,7 @@ __all__ = [
     "AuthenticationError",
     "ConnectionError",
     "InferenceCapacityError",
+    "InvalidRequestError",
     "NotFoundError",
     "RateLimitError",
     "ServerError",
@@ -71,7 +73,7 @@ __all__ = [
     "Transcription",
 ]
 
-__version__ = "2.0.5"
+__version__ = "2.1.3"
 
 
 class NaijaLingo:

@@ -76,6 +76,9 @@ For an offline request/response check that works directly in GoLand, run `go tes
 ## Error handling
 
 All non-2xx responses return `*naijalingo.APIError`, which includes `StatusCode` and `Message`.
+For STT, invalid input, unsupported formats, oversized files, and inaccessible
+audio URLs return status `400`, `413`, `415`, or `422`; transient upstream failures
+return a `5xx` status. An empty transcript is valid and can indicate silent audio.
 
 ```go
 if errors.Is(err, naijalingo.ErrAuthentication) {

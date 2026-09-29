@@ -28,12 +28,13 @@ import {
   type ServiceInfo,
 } from "./types.js";
 
-export const VERSION = "0.1.2";
+export const VERSION = "0.2.2";
 
 export {
   AuthenticationError,
   ConnectionError,
   InferenceCapacityError,
+  InvalidRequestError,
   NaijaLingoError,
   NotFoundError,
   RateLimitError,

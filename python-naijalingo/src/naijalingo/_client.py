@@ -14,6 +14,7 @@ from naijalingo._exceptions import (
     AuthenticationError,
     ConnectionError,
     InferenceCapacityError,
+    InvalidRequestError,
     NaijaLingoError,
     NotFoundError,
     RateLimitError,
@@ -46,7 +47,7 @@ class _BaseClient:
         # api_key is optional for self-hosted / local vLLM servers that have
         # no authentication middleware. For the managed API (api.9jalingo.org)
         # a key is required and the server will 401 without it.
-        headers: dict[str, str] = {"User-Agent": "naijalingo-python/2.0.4"}
+        headers: dict[str, str] = {"User-Agent": "naijalingo-python/2.1.3"}
         if self.api_key:
             headers["X-API-Key"] = self.api_key
 
@@ -112,6 +113,8 @@ class _BaseClient:
             raise AuthenticationError(detail, status_code=status)
         elif status == 404:
             raise NotFoundError(detail, status_code=status)
+        elif status in (400, 413, 415, 422):
+            raise InvalidRequestError(detail, status_code=status)
         elif status == 429:
             raise RateLimitError(detail, status_code=status)
         elif status >= 500:

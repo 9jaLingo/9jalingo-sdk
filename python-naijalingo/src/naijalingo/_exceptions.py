@@ -23,6 +23,10 @@ class NotFoundError(NaijaLingoError):
     """Raised when a requested resource is not found."""
 
 
+class InvalidRequestError(NaijaLingoError):
+    """Raised when request input is invalid or cannot be processed."""
+
+
 class ServerError(NaijaLingoError):
     """Raised when the API returns a 5xx error."""
 

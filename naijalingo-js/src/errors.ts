@@ -35,6 +35,14 @@ export class NotFoundError extends NaijaLingoError {
   }
 }
 
+/** Raised when request input is invalid or cannot be processed. */
+export class InvalidRequestError extends NaijaLingoError {
+  constructor(message: string, statusCode?: number, response?: unknown) {
+    super(message, statusCode, response);
+    this.name = "InvalidRequestError";
+  }
+}
+
 /** Raised when the API returns a 5xx error. */
 export class ServerError extends NaijaLingoError {
   constructor(message: string, statusCode?: number, response?: unknown) {

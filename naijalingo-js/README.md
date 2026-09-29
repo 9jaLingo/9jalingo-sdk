@@ -227,6 +227,7 @@ console.log(status.status, status.totalSpeakers);
 import {
   NaijaLingo,
   AuthenticationError,
+  InvalidRequestError,
   NotFoundError,
   ServerError,
 } from "naijalingo";
@@ -238,6 +239,8 @@ try {
 } catch (err) {
   if (err instanceof AuthenticationError) {
     console.error("Invalid API key");
+  } else if (err instanceof InvalidRequestError) {
+    console.error("Check the request or public audio URL:", err.message);
   } else if (err instanceof NotFoundError) {
     console.error("Speaker not found:", err.message);
   } else if (err instanceof ServerError) {
@@ -248,6 +251,11 @@ try {
   }
 }
 ```
+
+STT reports invalid input, unsupported audio formats, oversized files, and
+inaccessible audio URLs as `InvalidRequestError` (HTTP 400/413/415/422).
+Transient audio-host or inference failures are reported as `ServerError` or
+`InferenceCapacityError`.
 
 ---
 

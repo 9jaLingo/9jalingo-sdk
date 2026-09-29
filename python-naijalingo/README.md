@@ -267,7 +267,13 @@ Language codes (`ha`, `ig`, `yo`, `pcm`) are used to **filter speakers** and for
 ## Error Handling
 
 ```python
-from naijalingo import NaijaLingo, AuthenticationError, NotFoundError, ServerError
+from naijalingo import (
+    NaijaLingo,
+    AuthenticationError,
+    InvalidRequestError,
+    NotFoundError,
+    ServerError,
+)
 
 client = NaijaLingo(api_key="nl-...")
 
@@ -277,12 +283,18 @@ except AuthenticationError:
     print("Invalid API key")
 except NotFoundError as e:
     print(f"Speaker not found: {e.message}")
+except InvalidRequestError as e:
+    print(f"Check the request or public audio URL: {e.message}")
 except ServerError:
     print("Server error — try again later")
 except ValueError as e:
     # Raised locally if you pass a language code as voice, e.g. voice="pcm"
     print(e)
 ```
+
+STT raises `InvalidRequestError` (HTTP 400/413/415/422) for invalid input,
+unsupported audio formats, oversized files, or inaccessible audio URLs. Transient
+audio-host or inference failures raise `ServerError` or `InferenceCapacityError`.
 
 ---
 
