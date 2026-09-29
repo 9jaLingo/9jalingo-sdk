@@ -79,7 +79,7 @@ const client = new NaijaLingo({ apiKey: "YOUR_API_KEY" });
 ```ts
 const transcript = await client.stt.transcribe(
   "https://cdn.example.com/pidgin-sample.wav",
-  { language: "pcm", durationSeconds: 8.1 },
+  { language: "pcm" },
 );
 console.log(transcript.text, transcript.language, transcript.duration);
 ```

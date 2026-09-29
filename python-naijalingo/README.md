@@ -85,7 +85,6 @@ audio.save("output.wav")
 transcript = client.stt.transcribe(
     "https://cdn.example.com/pidgin-sample.wav",
     language="pcm",
-    duration_seconds=8.1,
 )
 print(transcript.text, transcript.language, transcript.duration)
 ```

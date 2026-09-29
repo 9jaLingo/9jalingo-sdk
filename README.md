@@ -83,7 +83,7 @@ await audio.save("greeting.wav");
 ## Speech-to-Text
 
 STT audio must be available at a public HTTPS URL. Each request needs an API key
-with the `stt` scope and the actual audio duration for billing.
+with the `stt` scope.
 
 **Python**
 
@@ -91,7 +91,6 @@ with the `stt` scope and the actual audio duration for billing.
 transcript = client.stt.transcribe(
     "https://cdn.example.com/pidgin-sample.wav",
     language="pcm",
-    duration_seconds=8.1,
 )
 print(transcript.text, transcript.language)
 ```
@@ -101,7 +100,7 @@ print(transcript.text, transcript.language)
 ```ts
 const transcript = await client.stt.transcribe(
   "https://cdn.example.com/pidgin-sample.wav",
-  { language: "pcm", durationSeconds: 8.1 },
+  { language: "pcm" },
 );
 console.log(transcript.text, transcript.language);
 ```
@@ -109,7 +108,7 @@ console.log(transcript.text, transcript.language);
 **Go**
 
 ```go
-transcript, err := client.STT.Transcribe(ctx, "https://cdn.example.com/pidgin-sample.wav", naijalingo.TranscribeOptions{Language: "pcm", DurationSeconds: 8.1})
+transcript, err := client.STT.Transcribe(ctx, "https://cdn.example.com/pidgin-sample.wav", naijalingo.TranscribeOptions{Language: "pcm"})
 if err != nil { log.Fatal(err) }
 fmt.Println(transcript.Text, transcript.Language)
 ```

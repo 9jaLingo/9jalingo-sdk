@@ -54,7 +54,7 @@ go run ./examples/tts
 transcript, err := client.STT.Transcribe(
     context.Background(),
     "https://cdn.example.com/pidgin-sample.wav",
-    naijalingo.TranscribeOptions{Language: "pcm", DurationSeconds: 8.1},
+    naijalingo.TranscribeOptions{Language: "pcm"},
 )
 if err != nil {
     log.Fatal(err)
