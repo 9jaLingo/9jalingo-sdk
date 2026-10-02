@@ -27,6 +27,10 @@ _DEFAULT_BASE_URL = "https://api.9jalingo.org"
 # Formula: N_concurrent * single_request_latency.  300s handles up to ~25 requests
 # at ~12s each.  Override via NaijaLingo(timeout=...) for higher concurrency.
 _DEFAULT_TIMEOUT = 300.0
+# While a speech engine starts from zero the API queues the request; wait at most this long
+# (the server itself gives up after 20 minutes, then a long file still needs time to process).
+_COLD_START_MAX_WAIT_SECONDS = 40 * 60
+_COLD_START_MAX_POLL_FAILURES = 5
 
 
 class _BaseClient:
@@ -47,7 +51,7 @@ class _BaseClient:
         # api_key is optional for self-hosted / local vLLM servers that have
         # no authentication middleware. For the managed API (api.9jalingo.org)
         # a key is required and the server will 401 without it.
-        headers: dict[str, str] = {"User-Agent": "naijalingo-python/2.1.3"}
+        headers: dict[str, str] = {"User-Agent": "naijalingo-python/2.2.0"}
         if self.api_key:
             headers["X-API-Key"] = self.api_key
 
@@ -131,6 +135,78 @@ class _BaseClient:
         """POST request with JSON body, returning parsed JSON."""
         resp = self._request("POST", path, json=body)
         return resp.json()
+
+    def _post_json_waiting_for_cold_start(self, path: str, body: dict, *, job_path: str, label: str) -> dict:
+        """POST JSON and, if the engine is starting up, transparently wait for the queued job.
+
+        Sends ``Prefer: respond-async-on-cold-start``. A warm engine answers ``200`` directly (this
+        behaves exactly like ``_post_json``). When the engine was scaled to zero the server answers
+        ``202`` with a ``job_id``; this polls ``job_path`` (``{job_id}`` placeholder) until the job
+        completes and returns the final response body. Servers that do not know the header simply
+        ignore it.
+        """
+        response = self._request("POST", path, json=body, headers={"Prefer": "respond-async-on-cold-start"})
+        if response.status_code != 202:
+            return response.json()
+
+        invalid = f"The API returned an invalid queued {label} response."
+        try:
+            queued = response.json()
+        except Exception as exc:
+            raise ServerError(invalid, status_code=202) from exc
+        if not isinstance(queued, dict) or queued.get("status") != "queued":
+            raise ServerError(invalid, status_code=202, response=queued if isinstance(queued, dict) else None)
+        job_id = str(queued.get("job_id") or "").strip()
+        if not job_id:
+            raise ServerError(f"The queued {label} response did not include a job ID.", status_code=202, response=queued)
+
+        status_path = job_path.format(job_id=quote(job_id, safe=""))
+        deadline = time.time() + _COLD_START_MAX_WAIT_SECONDS
+        status_body: dict = queued
+        transient_failures = 0
+        while time.time() < deadline:
+            try:
+                delay = max(1.0, min(float(status_body.get("retry_after", queued.get("retry_after", 5))), 30.0))
+            except (TypeError, ValueError):
+                delay = 5.0
+            time.sleep(delay)
+            try:
+                status_body = self._get_json(status_path)
+                transient_failures = 0
+            except (ConnectionError, ServerError):
+                # A brief network or gateway problem must not abandon a job that is still running.
+                transient_failures += 1
+                if transient_failures >= _COLD_START_MAX_POLL_FAILURES:
+                    raise
+                continue
+
+            if not isinstance(status_body, dict):
+                raise ServerError(f"The queued {label} job returned an invalid status.", status_code=502)
+            state = str(status_body.get("status") or "").lower()
+            if state == "completed":
+                final = status_body.get("response")
+                if not isinstance(final, dict):
+                    raise ServerError(
+                        f"The completed {label} job did not include a result.",
+                        status_code=502,
+                        response=status_body,
+                    )
+                return final
+            if state == "failed":
+                message = str(status_body.get("error") or f"Queued {label} job failed.")
+                if "did not start in time" in message.lower():
+                    raise InferenceCapacityError(message, status_code=503, response=status_body)
+                raise ServerError(message, status_code=502, response=status_body)
+            if state not in {"queued", "running", "processing"}:
+                raise ServerError(
+                    f"The queued {label} job returned an unknown status: {state or 'missing'}.",
+                    status_code=502,
+                    response=status_body,
+                )
+
+        raise InferenceCapacityError(
+            f"Queued {label} job did not finish in time.", status_code=504, response=status_body
+        )
 
     def _post_bytes(self, path: str, body: dict) -> bytes:
         """POST request with JSON body, returning raw bytes."""

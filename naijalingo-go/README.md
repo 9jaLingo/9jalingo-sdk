@@ -62,6 +62,13 @@ if err != nil {
 fmt.Println(transcript.Text, transcript.Language, transcript.Duration)
 ```
 
+**Cold starts:** the speech engine scales down when idle and takes a few minutes to start. The
+first request after a quiet period waits for it automatically (`Transcribe` returns once the
+transcript is ready; cancel `ctx` to stop waiting) instead of failing; you are only charged for
+the successful transcription. Long recordings (over 40 seconds, up to 60 minutes) are split and
+transcribed automatically, so allow a few minutes for long audio. Language hints: `yo`, `ig`, `ha`,
+`pcm`, `en`.
+
 The audio URL must be publicly reachable and your API key must have the `stt`
 scope. Supported language hints are `yo`, `ha`, `ig`, `pcm`, and `en`.
 

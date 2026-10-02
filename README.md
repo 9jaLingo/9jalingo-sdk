@@ -85,6 +85,12 @@ await audio.save("greeting.wav");
 STT audio must be available at a public HTTPS URL. Each request needs an API key
 with the `stt` scope.
 
+**Cold starts:** the speech engine scales down when idle and takes a few minutes to start. The
+first request after a quiet period waits for it automatically (it returns once the transcript is
+ready) instead of failing; you are only charged for the successful transcription. Long recordings
+(over 40 seconds, up to 60 minutes) are split and transcribed automatically, so allow a few minutes
+for long audio.
+
 **Python**
 
 ```python

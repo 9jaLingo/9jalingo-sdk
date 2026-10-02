@@ -26,11 +26,24 @@ class STT:
         *,
         language: str | None = None,
     ) -> Transcription:
-        """Transcribe audio hosted at a public HTTPS URL."""
+        """Transcribe audio hosted at a public HTTPS URL.
+
+        Args:
+            file_url: Direct public ``http(s)`` link to the audio file.
+            language: Optional language code: ``yo``, ``ig``, ``ha``, ``pcm`` or ``en``.
+
+        If the speech engine was idle it needs a few minutes to start; this call then waits for the
+        queued job instead of failing, and long recordings (over 40 s) are split automatically.
+        """
         body = {"file_url": file_url}
         if language is not None:
             body["language"] = language
-        response = self._client._post_json("/v1/audio/transcriptions", body)
+        response = self._client._post_json_waiting_for_cold_start(
+            "/v1/audio/transcriptions",
+            body,
+            job_path="/v1/audio/transcriptions/jobs/{job_id}",
+            label="STT",
+        )
         result = response
         while isinstance(result, dict):
             if result.get("error"):

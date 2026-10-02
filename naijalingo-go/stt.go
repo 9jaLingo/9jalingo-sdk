@@ -17,6 +17,10 @@ type Transcription struct {
 	Model    string  `json:"model"`
 }
 
+// Transcribe transcribes audio hosted at a public HTTPS URL. options.Language is one of
+// "yo", "ig", "ha", "pcm" or "en". If the speech engine was idle it needs a few minutes to start;
+// Transcribe then waits for the queued job instead of failing (cancel ctx to stop waiting), and long
+// recordings (over 40 s) are split automatically.
 func (s *STTService) Transcribe(ctx context.Context, fileURL string, options TranscribeOptions) (Transcription, error) {
 	payload := map[string]any{"file_url": fileURL}
 	if options.Language != "" {
@@ -31,7 +35,14 @@ func (s *STTService) Transcribe(ctx context.Context, fileURL string, options Tra
 		Error    string                 `json:"error"`
 	}
 	var response transcriptionResponse
-	err := s.client.postJSON(ctx, "/v1/audio/transcriptions", payload, &response)
+	err := s.client.postJSONWaitingForColdStart(
+		ctx,
+		"/v1/audio/transcriptions",
+		payload,
+		&response,
+		func(jobID string) string { return "/v1/audio/transcriptions/jobs/" + jobID },
+		"STT",
+	)
 	if err != nil {
 		return Transcription{}, err
 	}
